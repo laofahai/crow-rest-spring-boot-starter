@@ -14,8 +14,8 @@ public enum QueryOperator {
     IN("in"), // in
     NIN("notIn"), // not in
     BTW("between"), // between
-    LIKE("like"),
-    ; // like
+    LIKE("like"), // like
+    ;
 
     private final String operatorName;
 

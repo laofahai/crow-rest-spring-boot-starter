@@ -32,7 +32,7 @@ import java.util.Optional;
 @RestController
 abstract public class CrowControllerJpa<
         ID,
-        T extends ICrowEntity<ID>,
+        T extends ICrowEntity<ID, V>,
         V extends ICrowIO,
         D extends ICrowIO>
         implements CrowController<ID, T, V, D> {

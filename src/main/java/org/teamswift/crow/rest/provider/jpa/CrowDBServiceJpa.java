@@ -35,7 +35,7 @@ import java.util.Optional;
  * @param <T>
  */
 public class CrowDBServiceJpa<
-            ID, T extends ICrowEntity<ID>
+            ID, T extends ICrowEntity<ID, ?>
         >
         extends SimpleJpaRepository<T, ID>
         implements ICrowDBService<ID, T> {

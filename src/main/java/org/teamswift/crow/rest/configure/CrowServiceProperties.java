@@ -17,4 +17,6 @@ public class CrowServiceProperties {
 
     private Class<? extends ICrowResult> defaultResultClass = CrowDefaultResult.class;
 
+    private boolean dataStructureController = false;
+
 }

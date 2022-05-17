@@ -37,7 +37,7 @@ public class RequestBodyResolveHandler {
         add(")"); // >=
     }};
 
-    public static RequestBodyResolved handle(HttpServletRequest request, Class<? extends ICrowEntity<?>> entityCls) {
+    public static RequestBodyResolved handle(HttpServletRequest request, Class<? extends ICrowEntity<?, ?>> entityCls) {
 
         String filtersStr = "[]";
         String sortStr = "-id";

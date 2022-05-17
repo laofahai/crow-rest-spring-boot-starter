@@ -69,7 +69,7 @@ public class Scaffolds {
     }
 
 
-    public static <T extends ICrowEntity<?>> String getApiDisplayNameByEntityClass(Class<T> entityClass) {
+    public static <T extends ICrowEntity<?, ?>> String getApiDisplayNameByEntityClass(Class<T> entityClass) {
         Label apiModel = entityClass.getAnnotation(Label.class);
         if(apiModel == null) {
             return getApiAliasByEntityName(entityClass.getName());

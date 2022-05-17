@@ -9,7 +9,7 @@ import java.util.Optional;
  * @param <ID> The primary key type of Entity
  * @param <T> The Entity
  */
-public interface ICrowDBService<ID, T extends ICrowEntity<ID>> {
+public interface ICrowDBService<ID, T extends ICrowEntity<ID, ?>> {
 
     ICrowListResult<T> findAll(HttpServletRequest request);
 

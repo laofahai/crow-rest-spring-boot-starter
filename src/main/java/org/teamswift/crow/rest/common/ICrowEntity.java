@@ -6,7 +6,7 @@ import java.util.Date;
  * The basic entity provides primary key and soft delete feature.
  * @param <ID> The primary key type
  */
-public interface ICrowEntity<ID> extends ICrowIO {
+public interface ICrowEntity<ID, V extends ICrowIO> extends ICrowIO {
 
     ID gtId();
 

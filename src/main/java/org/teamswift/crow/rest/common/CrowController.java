@@ -10,7 +10,7 @@ import org.teamswift.crow.rest.utils.GenericUtils;
  */
 public interface CrowController<
         ID,
-        T extends ICrowEntity<ID>,
+        T extends ICrowEntity<ID, V>,
         V extends ICrowIO,
         D extends ICrowIO
         > {

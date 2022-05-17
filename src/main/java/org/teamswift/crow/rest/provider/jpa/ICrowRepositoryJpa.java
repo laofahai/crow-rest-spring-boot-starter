@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface ICrowRepositoryJpa<I, T extends ICrowEntity<I>>
+public interface ICrowRepositoryJpa<I, T extends ICrowEntity<I, ?>>
         extends JpaRepository<T, I>, JpaSpecificationExecutor<T> {
 }
