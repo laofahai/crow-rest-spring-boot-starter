@@ -37,21 +37,7 @@ For basic usage, you need `Controller`, `Repository`, `Entity`, and `VO` `DTO` a
 BTW, I think it's still a little cumbersome to define even a few files like I'm saying, so I may build a code-generator future.
 
 Okay, let's start from a module named `Book`.
-First step, create an entity for `Book` like this:
-
-```java
-@Data
-@Entity
-public class Book implements ICrowEntity<Integer> {
-
-    @Id private Integer id;
-    
-    private String name;
-    
-    //....
-}
-```
-Second, I recommend you to define the `VO` and `DTO` for Book:
+first step, I recommend you to define the `VO` and `DTO` for Book:
 
 ```java
 @Data
@@ -69,6 +55,22 @@ public class BookVo implements ICrowDTO {
 }
 ```
 
+second, create an entity for `Book` like this:
+
+```java
+@Data
+@Entity
+public class Book extends BaseCrowEntity implements ICrowEntity<Integer, BookVo> {
+
+    @Id
+    private Integer id;
+
+    private String name;
+
+    //....
+}
+```
+
 Then, create a JPA repository for it like this:
 ```java
 @Repository
@@ -80,9 +82,9 @@ At the end, let's build the hardest thing here, the controller:
 ```java
 @RestController
 @RequestMapping("/my/book")
-public class UserController extends CrowControllerJpa<
-        Integer,
-        User,
+public class BookController extends CrowControllerJpa<
+        Integer, // this is the entity ID type
+        Book,
         BookVo,
         BookDto
         > {
@@ -90,9 +92,12 @@ public class UserController extends CrowControllerJpa<
 ```
 
 Now you can do the CRUD operation to the Book:
-* `POST /my/book` for create a new book.
-* `PUT /my/book/{id}` for update book information.
-* `GET /my/book` for books list.
-* `DELETE /my/book/{id}` for soft-delete or destroy a book from database.
+* `POST /my/book` for create a new book
+* `PUT /my/book/{id}` for update book information
+* `GET /my/book` for books list
+* `DELETE /my/book/{id}` for soft-delete a book
+* `DELETE /my/book/batch/{ids}` for batch soft-delete books via `ids` like `1,2,3`
+* `PUT /my/book/restore/{id}` for restore the soft-deleted book
+* `PUT /my/book/restoreBatch/{ids}` for restore the soft-deleted books via `ids` like `1,2,3`
 
 for more usage, [follow this link](./doc.md) to see the full documents.
