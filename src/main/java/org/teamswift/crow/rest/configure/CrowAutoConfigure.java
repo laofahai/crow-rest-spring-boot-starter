@@ -21,10 +21,7 @@ public class CrowAutoConfigure {
         CrowBeanUtils.setApplicationContext(context);
     }
 
-
     @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "crow.starter", value = "enabled", havingValue = "true")
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
@@ -35,5 +32,6 @@ public class CrowAutoConfigure {
     public DozerBeanMapper dozerBeanMapper() {
         return new DozerBeanMapper();
     }
+
 
 }
