@@ -8,6 +8,8 @@ public interface ICrowResult<T> extends Serializable {
 
     int getHttpStatusCode();
 
+    CrowResultCode getResultCode();
+
     T getData();
 
     void setData(T data);

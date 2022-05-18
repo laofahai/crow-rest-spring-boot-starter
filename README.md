@@ -1,4 +1,4 @@
-Here is the document for crow-rest project usage.
+Crow-Rest is a quick-starter based on SpringBoot to handle common CRUD operations via RESTful API.
 
 ## Installation
 This package is not publish to the Maven Repository yet, so you can [download the release] and import to your package manually like this:

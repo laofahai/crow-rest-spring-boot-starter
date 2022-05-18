@@ -3,6 +3,7 @@ package org.teamswift.crow.rest.result.impl;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.teamswift.crow.rest.exception.BusinessException;
+import org.teamswift.crow.rest.result.CrowResultCode;
 import org.teamswift.crow.rest.result.ICrowResult;
 
 @Data
@@ -14,6 +15,8 @@ public class CrowErrorResult implements ICrowResult<String> {
     private String data;
 
     private String title;
+
+    private CrowResultCode resultCode;
 
     private int httpStatusCode;
 

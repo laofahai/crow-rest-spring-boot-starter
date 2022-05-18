@@ -16,12 +16,7 @@ public enum BusinessExceptionEnum {
 	/**
 	 * 数据未找到
 	 */
-	NOT_FOUND(DataNotFoundException.class, HttpStatus.NOT_FOUND, CrowResultCode.RESULT_DATA_NONE),
-
-	/**
-	 * 接口方法不允许
-	 */
-	METHOD_NOT_ALLOWED(MethodNotAllowException.class, HttpStatus.METHOD_NOT_ALLOWED, CrowResultCode.INTERFACE_ADDRESS_INVALID),
+	NOT_FOUND(DataNotFoundException.class, HttpStatus.NOT_FOUND, CrowResultCode.DATA_NOT_FOUND),
 
 	/**
 	 * 数据已存在
@@ -36,12 +31,7 @@ public enum BusinessExceptionEnum {
 	/**
 	 * 无访问权限
 	 */
-	FORBIDDEN(PermissionForbiddenException.class, HttpStatus.FORBIDDEN, CrowResultCode.PERMISSION_NO_ACCESS),
-
-	/**
-	 * 远程访问时错误
-	 */
-	REMOTE_ACCESS_ERROR(RemoteAccessException.class, HttpStatus.INTERNAL_SERVER_ERROR, CrowResultCode.INTERFACE_OUTER_INVOKE_ERROR),
+	FORBIDDEN(PermissionForbiddenException.class, HttpStatus.FORBIDDEN, CrowResultCode.PERMISSION_DENIED),
 
 	/**
 	 * 系统内部错误

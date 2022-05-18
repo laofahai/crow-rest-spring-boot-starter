@@ -1,5 +1,6 @@
 package org.teamswift.crow.rest.result.impl;
 
+import org.teamswift.crow.rest.result.CrowResultCode;
 import org.teamswift.crow.rest.result.ICrowResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,8 @@ public class CrowDefaultResult<T> implements ICrowResult<T> {
     private boolean success = true;
 
     private T data;
+
+    private CrowResultCode resultCode = CrowResultCode.SUCCESS;
 
     private final int httpStatusCode = HttpStatus.OK.value();
 

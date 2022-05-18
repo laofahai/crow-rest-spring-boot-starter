@@ -1,7 +1,8 @@
 package org.teamswift.crow.rest.common;
 
-import jdk.jfr.Label;
 import lombok.Data;
+import org.teamswift.crow.rest.annotation.I18N;
+import org.teamswift.crow.rest.annotation.SystemGeneratedValue;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
@@ -11,11 +12,12 @@ import java.util.Date;
 @MappedSuperclass
 public class BaseCrowEntity {
 
-    @Label("Deleted At")
+    @I18N("DeletedAt")
+    @SystemGeneratedValue
     private Date deletedDate;
 
     @Transient
-    @Label("Is Deleted")
+    @I18N("IsDeleted")
     private boolean deleted;
 
     public void setDeleted(boolean deleted) {
