@@ -12,7 +12,7 @@ public interface ICrowEntity<ID, V extends ICrowIO> extends ICrowIO {
 
     boolean isDeleted();
 
-    void setDeleted();
+    void setDeleted(boolean deleted);
 
     Date getDeletedDate();
 

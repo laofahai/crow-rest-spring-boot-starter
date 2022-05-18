@@ -2,6 +2,7 @@ package org.teamswift.crow.rest.handler.requestParams;
 
 import lombok.Data;
 import org.springframework.data.domain.Sort;
+import org.teamswift.crow.rest.handler.RequestBodyResolveHandler;
 
 import java.util.List;
 
@@ -10,11 +11,11 @@ public class RequestBodyResolved {
 
     private List<FilterItem> filterItems;
 
-    private Sort sortOrders;
+    private Sort sortOrders = RequestBodyResolveHandler.handleSortItem("-id");
 
-    private int pageSize;
+    private int pageSize = 50;
 
-    private int page;
+    private int page = 1;
 
     private boolean pageable;
 

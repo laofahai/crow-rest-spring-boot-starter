@@ -14,7 +14,7 @@ public class CrowListResult<T> implements ICrowListResult<T> {
 
     private boolean success = true;
 
-    private final HttpStatus httpStatus = HttpStatus.OK;
+    private HttpStatus httpStatus = HttpStatus.OK;
 
     private Collection<T> data = new ArrayList<>();
 

@@ -221,7 +221,7 @@ public class RequestBodyResolveHandler {
         return filter;
     }
 
-    static private Sort handleSortItem(String sortStr) {
+    static public Sort handleSortItem(String sortStr) {
         List<Sort.Order> orders = new ArrayList<>();
 
         // sorter style like: [{property: foo, direction: ASC}]

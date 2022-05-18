@@ -15,7 +15,11 @@ public interface CrowController<
         D extends ICrowIO
         > {
 
-    ICrowDBService<ID, T> getDBService();
+    ICrowDBService<ID, T> getCrowProvider();
+
+    default Class<ID> getIdCls(){
+        return (Class<ID>) GenericUtils.get(this.getClass(), 0);
+    }
 
     default Class<T> getEntityCls() {
         return (Class<T>) GenericUtils.get(this.getClass(), 1);

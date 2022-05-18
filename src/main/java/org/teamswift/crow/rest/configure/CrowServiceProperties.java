@@ -1,11 +1,15 @@
 package org.teamswift.crow.rest.configure;
 
+import org.teamswift.crow.rest.exception.ErrorMessages;
+import org.teamswift.crow.rest.exception.impl.InternalServerException;
 import org.teamswift.crow.rest.result.ICrowListResult;
 import org.teamswift.crow.rest.result.ICrowResult;
 import org.teamswift.crow.rest.result.impl.CrowDefaultResult;
 import org.teamswift.crow.rest.result.impl.CrowListResult;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.lang.reflect.InvocationTargetException;
 
 @ConfigurationProperties("crow.starter")
 @Data
@@ -18,5 +22,21 @@ public class CrowServiceProperties {
     private Class<? extends ICrowResult> defaultResultClass = CrowDefaultResult.class;
 
     private boolean dataStructureController = false;
+
+    public <T> ICrowListResult<T> getListResultInstance() {
+        try {
+            return defaultListResultClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new InternalServerException(ErrorMessages.ErrorWhenInstance.getMessage() + e.getMessage());
+        }
+    }
+
+    public <T> ICrowResult<T> getResultInstance() {
+        try {
+            return defaultResultClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new InternalServerException(ErrorMessages.ErrorWhenInstance.getMessage() + e.getMessage());
+        }
+    }
 
 }

@@ -1,20 +1,25 @@
 package org.teamswift.crow.rest.utils;
 
 import com.google.common.base.Strings;
+import org.springframework.util.Assert;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.exception.BusinessException;
 import jdk.jfr.Label;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.teamswift.crow.rest.exception.impl.InternalServerException;
 
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class Scaffolds {
@@ -24,20 +29,6 @@ public class Scaffolds {
     };
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public static Map<String, String> regionToMap(String region) {
-        if(Strings.isNullOrEmpty(region)) {
-            return new HashMap<>();
-        }
-
-        String[] tmp = region.split(" ");
-        Map<String, String> result = new HashMap<>();
-        result.put("province", tmp[0]);
-        result.put("city", tmp.length > 1 ? tmp[1] : tmp[0]);
-        result.put("street", tmp.length > 2 ? tmp[2] : result.get("city"));
-
-        return result;
-    }
 
 
     /**
@@ -56,26 +47,6 @@ public class Scaffolds {
         return functionAlias.get(0) + "." + StringUtils.uncapitalize(functionAlias.get(1));
     }
 
-    /**
-     * 根据 service 获取 api alias
-     * @param className
-     * @return
-     */
-    public static String getApiAliasByServiceName(String className) {
-        List<String> functionAlias = Arrays.asList(className.split("\\."));
-        functionAlias = functionAlias.subList(5, 7);
-
-        return functionAlias.get(0) + "." + StringUtils.uncapitalize(functionAlias.get(1));
-    }
-
-
-    public static <T extends ICrowEntity<?, ?>> String getApiDisplayNameByEntityClass(Class<T> entityClass) {
-        Label apiModel = entityClass.getAnnotation(Label.class);
-        if(apiModel == null) {
-            return getApiAliasByEntityName(entityClass.getName());
-        }
-        return apiModel.value();
-    }
 
     public static BigDecimal inputValueToDecimal(Object inputValue) {
         String v = String.valueOf(inputValue);
@@ -265,17 +236,6 @@ public class Scaffolds {
         return fieldList;
     }
 
-    public static Map<String, String> getModuleByApi(String api) {
-        String[] tmp = api.split("/");
-        if(tmp.length < 3) {
-            return new HashMap<>();
-        }
-
-        return new HashMap<>(){{
-            put("app", tmp[1]);
-            put("module", tmp[2]);
-        }};
-    }
 
     public static Path<?> getExpressionPath(String fieldName, Root<?> root) {
         Path<?> path = root;
@@ -284,5 +244,17 @@ public class Scaffolds {
         }
 
         return path;
+    }
+
+    public static <ID> List<ID> parseIdStringToGeneric(String ids, Class<ID> genericType) {
+        return Arrays.stream(ids.split(",")).map(id -> {
+            try {
+                Assert.notNull(genericType, "ID generic must provided.");
+                Method method = genericType.getMethod("valueOf", String.class);
+                return (ID) method.invoke(null, id);
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new InternalServerException("Can't convert provided id string to ID generic type: " + e.getMessage());
+            }
+        }).collect(Collectors.toList());
     }
 }

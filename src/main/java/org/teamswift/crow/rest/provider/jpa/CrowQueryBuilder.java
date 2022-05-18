@@ -12,9 +12,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class QueryOperator {
+public class CrowQueryBuilder {
 
-    static public Predicate equals(Expression<?> path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
+    static public Predicate equals(Expression path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
         if(value == null || value == "" || value == "null") {
             return cb.and(result, cb.isNull(path));
         }
@@ -24,7 +24,7 @@ public class QueryOperator {
         );
     }
 
-    static public Predicate equals(List<Expression<?>> paths, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
+    static public Predicate equals(List<Expression> paths, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
         List<Predicate> or = new ArrayList<>();
         for(Expression<?> e: paths) {
             or.add(cb.equal(e, value));
@@ -34,7 +34,7 @@ public class QueryOperator {
         return cb.or(or.toArray(p));
     }
 
-    static public Predicate notEquals(Expression<?> path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
+    static public Predicate notEquals(Expression path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
         if(Strings.isNullOrEmpty(String.valueOf(value)) || "null".equals(String.valueOf(value))) {
             return cb.and(result, cb.isNotNull(path));
         }
@@ -44,7 +44,7 @@ public class QueryOperator {
         );
     }
 
-    static public Predicate notEquals(List<Expression<?>> paths, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
+    static public Predicate notEquals(List<Expression> paths, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
         List<Predicate> or = new ArrayList<>();
         for(Expression<?> e: paths) {
             or.add(cb.notEqual(e, value));
@@ -54,7 +54,7 @@ public class QueryOperator {
         return cb.or(or.toArray(p));
     }
 
-    static public Predicate like(Expression<String> path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
+    static public Predicate like(Expression path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
         String stringValue = String.valueOf(value);
         if(!stringValue.contains("%")) {
             stringValue = "%" + stringValue + "%";
@@ -69,7 +69,7 @@ public class QueryOperator {
         );
     }
 
-    static public Predicate like(List<Expression<String>> paths, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
+    static public Predicate like(List<Expression> paths, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
         String stringValue = String.valueOf(value);
         if(!stringValue.contains("%")) {
             stringValue = "%" + stringValue + "%";
@@ -84,14 +84,14 @@ public class QueryOperator {
         return cb.or(or.toArray(p));
     }
 
-    static public Predicate in(Expression<?> path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
+    static public Predicate in(Expression path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
 
-        List valueList;
+        List<?> valueList;
 
         if(!(value instanceof List)) {
             valueList = Arrays.asList(value.toString().replaceAll(",", "\\|").split("\\|"));
         } else {
-            valueList = (List) value;
+            valueList = (List<?>) value;
         }
 
         CriteriaBuilder.In<Object> in = cb.in(path);
@@ -103,12 +103,12 @@ public class QueryOperator {
 
     static public Predicate notIn(Expression<?> path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
 
-        List valueList;
+        List<?> valueList;
 
         if(!(value instanceof List)) {
             valueList = Arrays.asList(value.toString().replaceAll(",", "\\|").split("\\|"));
         } else {
-            valueList = (List) value;
+            valueList = (List<?>) value;
         }
 
         CriteriaBuilder.In<Object> notIn = cb.in(path);
@@ -124,7 +124,7 @@ public class QueryOperator {
             throw new ParameterInvalidException("BETWEEN 查找参数必须为数组");
         }
 
-        List valueList = (List) value;
+        List<?> valueList = (List<?>) value;
 
         if(valueList.size() < 2) {
             throw new ParameterInvalidException("区间查询需要两个查询条件");

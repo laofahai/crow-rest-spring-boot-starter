@@ -1,15 +1,22 @@
 package org.teamswift.crow.rest.provider.jpa;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.transaction.annotation.Transactional;
 import org.teamswift.crow.rest.common.ICrowDBService;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
+import org.teamswift.crow.rest.exception.ErrorMessages;
+import org.teamswift.crow.rest.exception.impl.DataNotFoundException;
 import org.teamswift.crow.rest.exception.impl.InternalServerException;
 import org.teamswift.crow.rest.handler.RequestBodyResolveHandler;
+import org.teamswift.crow.rest.handler.dataStructure.EntityMeta;
+import org.teamswift.crow.rest.handler.dataStructure.FieldStructure;
 import org.teamswift.crow.rest.handler.requestParams.FilterItem;
+import org.teamswift.crow.rest.handler.requestParams.QueryOperator;
 import org.teamswift.crow.rest.handler.requestParams.RequestBodyResolved;
 import org.teamswift.crow.rest.result.ICrowListResult;
 import org.teamswift.crow.rest.result.impl.CrowListResult;
+import org.teamswift.crow.rest.service.CrowDataStructureService;
 import org.teamswift.crow.rest.utils.CrowBeanUtils;
 import org.teamswift.crow.rest.utils.Scaffolds;
 import org.springframework.data.domain.Page;
@@ -18,16 +25,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
+import javax.persistence.Query;
+import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * The JPA provider for database service, implemented most of the common CRUD operation via JPA.
@@ -46,8 +51,13 @@ public class CrowDBServiceJpa<
 
     private final ObjectMapper objectMapper = CrowBeanUtils.getBean(ObjectMapper.class);
 
+    private final CrowDataStructureService dataStructureService = CrowBeanUtils.getBean(CrowDataStructureService.class);
+
+    private final Class<T> entityCls;
+
     public CrowDBServiceJpa(Class<T> domainClass, EntityManager em) {
         super(domainClass, em);
+        entityCls = domainClass;
         entityManager = em;
     }
 
@@ -60,8 +70,22 @@ public class CrowDBServiceJpa<
     }
 
     @Override
-    public ICrowListResult<T> findAll(HttpServletRequest request) {
-        RequestBodyResolved body = RequestBodyResolveHandler.handle(request, getDomainClass());
+    public ICrowListResult<T> findAllByIdsIn(Collection<ID> idList) {
+        RequestBodyResolved bodyResolved = new RequestBodyResolved();
+        List<FilterItem> filterItems = new ArrayList<>(){{
+            add(new FilterItem(
+                    "id", QueryOperator.IN, idList
+            ));
+        }};
+        bodyResolved.setFilterItems(filterItems);
+        bodyResolved.setPage(1);
+        bodyResolved.setPageSize(idList.size());
+
+        return findAll(bodyResolved);
+    }
+
+    @Override
+    public ICrowListResult<T> findAll(RequestBodyResolved body) {
 
         Specification<T> spec = ((root, query, criteriaBuilder) -> {
             Predicate condition;
@@ -80,7 +104,7 @@ public class CrowDBServiceJpa<
                             paths.add(Scaffolds.getExpressionPath(orField, root));
                         }
 
-                        Method method = QueryOperator.class.getDeclaredMethod(
+                        Method method = CrowQueryBuilder.class.getDeclaredMethod(
                                 filterItem.getOperator().getOperatorName(),
                                 List.class, Object.class, Object.class, Predicate.class, CriteriaBuilder.class
                         );
@@ -93,7 +117,7 @@ public class CrowDBServiceJpa<
                                 condition, criteriaBuilder);
                     // normal style
                     } else {
-                        Method method = QueryOperator.class.getDeclaredMethod(
+                        Method method = CrowQueryBuilder.class.getDeclaredMethod(
                                 filterItem.getOperator().getOperatorName(),
                                 Expression.class, Object.class, Object.class, Predicate.class, CriteriaBuilder.class
                         );
@@ -114,20 +138,18 @@ public class CrowDBServiceJpa<
             return condition;
         });
 
-        // start about query total count
-        CrowListResult<T> result = new CrowListResult<>();
-        result.setTotalItems(count(spec));
-        // only return count
-        if(body.isOnlyCount()) {
-            return null;
-        }
-        // end of count
+        ICrowListResult<T> result = properties.getListResultInstance();
 
-        PageRequest page = PageRequest.of(body.getPage() - 1, body.getPage(), body.getSortOrders());
+        if(body.isOnlyCount()) {
+            result.setTotalItems(count(spec));
+            return result;
+        }
+
+        PageRequest page = PageRequest.of(body.getPage() - 1, body.getPageSize(), body.getSortOrders());
 
         Page<T> rawPage = findAll(spec, page);
 
-        result.setPage(rawPage.getPageable().getPageNumber());
+        result.setPage(rawPage.getPageable().getPageNumber() + 1);
         result.setPageSize(rawPage.getPageable().getPageSize());
         result.setTotalPages(rawPage.getTotalPages());
         result.setData(rawPage.getContent());
@@ -140,10 +162,22 @@ public class CrowDBServiceJpa<
     }
 
     @Override
-    public Optional<T> findOneBy(String path, Object value) {
-        Specification<T> spec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(
-                root.get(path), value
-        );
+    public Optional<T> findOneBy(String field, Object value) {
+        Specification<T> spec = (root, query, criteriaBuilder) -> {
+            Path<Object> path = null;
+            if(field.contains(".")) {
+                String[] pathArray = field.split("\\.");
+                for(String p: pathArray) {
+                    path = Objects.requireNonNullElse(path, root).get(p);
+                }
+            } else {
+                path = root.get(field);
+            }
+
+            return criteriaBuilder.equal(
+                    path, value
+            );
+        };
         return findOne(spec);
     }
 
@@ -152,4 +186,98 @@ public class CrowDBServiceJpa<
         return super.save(entity);
     }
 
+    @Override
+    public T update(ID id, T entity) {
+
+        Class<T> domainCls = getEntityCls();
+
+        T exists = findById(id).orElseThrow(() -> {
+            throw new DataNotFoundException(ErrorMessages.NotFoundByID.getMessage());
+        });
+
+        EntityMeta entityConfiguration = dataStructureService.getEntitiesDataStructureMap().get(
+                dataStructureService.getApiPath(getEntityCls())
+        );
+
+        if(entityConfiguration == null) {
+            throw new InternalServerException("Your Entity must be managed by crow before your call this method. For example: YourEntity extends BaseCrowEntity");
+        }
+
+        Map<String, FieldStructure> fieldsMap = entityConfiguration.getFieldsMap();
+        for(String fieldName: fieldsMap.keySet()) {
+            FieldStructure fs = fieldsMap.get(fieldName);
+            if(fs.isVirtual() || fs.isSystemGenerated() || !fs.isUpdatable()) {
+                continue;
+            }
+
+            try {
+                // get new value
+                PropertyDescriptor pd = new PropertyDescriptor(fieldName, entity.getClass());
+                Method readMethod = pd.getReadMethod();
+                Object value = readMethod.invoke(entity);
+
+                PropertyDescriptor pdExists = new PropertyDescriptor(fieldName, domainCls);
+                Method method = pdExists.getWriteMethod();
+                method.invoke(exists, value);
+            } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
+                continue;
+            }
+        }
+
+        return super.save(exists);
+    }
+
+    @Override
+    public T softDelete(T entity) {
+        entity.setDeleted(true);
+        return save(entity);
+    }
+
+    @Override
+    public int softDeleteBatch(Collection<T> entities) {
+        String hql = String.format("update %s as e set e.deletedDate = :date where e in :entities", getEntityCls().getSimpleName());
+        Query query = getEntityManager().createQuery(hql);
+        query.setParameter("date", new Date());
+        query.setParameter("entities", entities);
+        return query.executeUpdate();
+    }
+
+    @Override
+    public T restore(T entity) {
+        entity.setDeleted(false);
+        return save(entity);
+    }
+
+    @Override
+    public int restoreBatch(Collection<ID> idList) {
+
+        RequestBodyResolved body = new RequestBodyResolved();
+        body.setFilterItems(new ArrayList<>() {{
+            add(new FilterItem("id", QueryOperator.IN, idList));
+        }});
+        body.setPage(1);
+        body.setPageSize(idList.size());
+        body.setOnlyDeleted(true);
+        body.setSortOrders(RequestBodyResolveHandler.handleSortItem("-id"));
+        ICrowListResult<T> result = findAll(body);
+
+        String hql = String.format("update %s e set e.deletedDate = null where e in :entities", getEntityCls().getSimpleName());
+        Query query = getEntityManager().createQuery(hql);
+        query.setParameter("entities", result.getData());
+        return query.executeUpdate();
+    }
+
+    @Override
+    public void destroy(T entity) {
+        delete(entity);
+    }
+
+    @Override
+    public void destroyBatch(Collection<T> entities) {
+        deleteAllInBatch(entities);
+    }
+
+    public Class<T> getEntityCls() {
+        return entityCls;
+    }
 }

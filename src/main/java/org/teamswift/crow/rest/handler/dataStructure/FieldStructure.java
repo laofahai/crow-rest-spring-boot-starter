@@ -24,7 +24,7 @@ public class FieldStructure implements Serializable {
 
     private boolean required;
 
-    private boolean updatable;
+    private boolean updatable = true;
 
     private Object value;
 
