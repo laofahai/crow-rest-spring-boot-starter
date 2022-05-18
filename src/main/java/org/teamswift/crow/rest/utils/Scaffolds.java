@@ -7,6 +7,7 @@ import org.teamswift.crow.rest.exception.BusinessException;
 import jdk.jfr.Label;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.InternalServerException;
 
 import javax.persistence.criteria.Path;
@@ -29,23 +30,6 @@ public class Scaffolds {
     };
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-
-    /**
-     * 根据类名获得模块 alias
-     * eg: org.teamswift.ones.core.entity.MODULE.user => core.user
-     * @param className
-     * @return
-     */
-    public static String getApiAliasByEntityName(String className) {
-        List<String> functionAlias = Arrays.asList(className.split("\\."));
-        if(functionAlias.size() < 7) {
-            throw new BusinessException("非法的 entity： " + className);
-        }
-        functionAlias = functionAlias.subList(5, 7);
-
-        return functionAlias.get(0) + "." + StringUtils.uncapitalize(functionAlias.get(1));
-    }
 
 
     public static BigDecimal inputValueToDecimal(Object inputValue) {
@@ -156,7 +140,7 @@ public class Scaffolds {
      * @param cls
      * @return
      */
-    static public Map<String, Field> getAllDeclareFields(Class<?> cls) {
+    static public Map<String, Field> getAllDeclareFieldsMap(Class<?> cls) {
         List<Field> fields = new ArrayList<>();
         while (cls!=null){
             fields.addAll(new ArrayList<>(Arrays.asList(cls.getDeclaredFields())));
@@ -181,7 +165,7 @@ public class Scaffolds {
      * @throws NoSuchFieldException
      */
     static public Field getDeclareFieldAll(Class<?> cls, String field) {
-        Map<String, Field> fields = getAllDeclareFields(cls);
+        Map<String, Field> fields = getAllDeclareFieldsMap(cls);
 
         if(fields.containsKey(field)) {
             return fields.get(field);
@@ -191,38 +175,6 @@ public class Scaffolds {
         } catch (NoSuchFieldException ignored) {}
 
         return null;
-    }
-
-
-    /**
-     * 根据value获取第一个key的值
-     * @param map
-     * @param value
-     * @param <K>
-     * @param <V>
-     * @return
-     */
-    static public <K, V> K getMapKeyByValue(Map<K, V> map, V value) {
-        for(K key: map.keySet()) {
-            if(map.get(key).equals(value)) {
-                return key;
-            }
-        }
-
-        return null;
-    }
-
-    static public boolean isAnnotationPresent(Class<?> cls, Class<? extends Annotation> annotation) {
-
-        if(cls.equals(Object.class)) {
-            return false;
-        }
-
-        if(cls.isAnnotationPresent(annotation)) {
-            return true;
-        }
-
-        return isAnnotationPresent(cls.getSuperclass(), annotation);
     }
 
     public static List<Field> getDeclareFieldsAll(Class<?> cls) {
@@ -237,6 +189,12 @@ public class Scaffolds {
     }
 
 
+    /**
+     * handle the fieldName style like foo.bar.hello
+     * @param fieldName
+     * @param root
+     * @return
+     */
     public static Path<?> getExpressionPath(String fieldName, Root<?> root) {
         Path<?> path = root;
         for(String f: fieldName.split("\\.")) {
@@ -253,7 +211,9 @@ public class Scaffolds {
                 Method method = genericType.getMethod("valueOf", String.class);
                 return (ID) method.invoke(null, id);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                throw new InternalServerException("Can't convert provided id string to ID generic type: " + e.getMessage());
+                throw new InternalServerException(
+                        CrowMessageUtil.error(CrowErrorMessage.ConvertIDStringToGeneric, e.getMessage())
+                );
             }
         }).collect(Collectors.toList());
     }

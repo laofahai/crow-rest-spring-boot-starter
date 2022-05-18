@@ -1,7 +1,9 @@
 package org.teamswift.crow.rest.provider.jpa;
 
 import com.google.common.base.Strings;
+import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.ParameterInvalidException;
+import org.teamswift.crow.rest.utils.CrowMessageUtil;
 import org.teamswift.crow.rest.utils.Scaffolds;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -121,13 +123,17 @@ public class CrowQueryBuilder {
     static public Predicate between(Expression path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
 
         if(!(value instanceof List)) {
-            throw new ParameterInvalidException("BETWEEN 查找参数必须为数组");
+            throw new ParameterInvalidException(
+                    CrowMessageUtil.error(CrowErrorMessage.BetweenQueryNeedParamForArray)
+            );
         }
 
         List<?> valueList = (List<?>) value;
 
         if(valueList.size() < 2) {
-            throw new ParameterInvalidException("区间查询需要两个查询条件");
+            throw new ParameterInvalidException(
+                    CrowMessageUtil.error(CrowErrorMessage.BetweenQueryNeedTwoParams)
+            );
         }
         Object value1 = valueList.get(0);
         if(value1 instanceof Date) {

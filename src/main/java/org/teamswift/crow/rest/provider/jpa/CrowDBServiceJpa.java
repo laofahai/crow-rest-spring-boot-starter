@@ -1,11 +1,10 @@
 package org.teamswift.crow.rest.provider.jpa;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.transaction.annotation.Transactional;
 import org.teamswift.crow.rest.common.ICrowDBService;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
-import org.teamswift.crow.rest.exception.ErrorMessages;
+import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.DataNotFoundException;
 import org.teamswift.crow.rest.exception.impl.InternalServerException;
 import org.teamswift.crow.rest.handler.RequestBodyResolveHandler;
@@ -15,9 +14,9 @@ import org.teamswift.crow.rest.handler.requestParams.FilterItem;
 import org.teamswift.crow.rest.handler.requestParams.QueryOperator;
 import org.teamswift.crow.rest.handler.requestParams.RequestBodyResolved;
 import org.teamswift.crow.rest.result.ICrowListResult;
-import org.teamswift.crow.rest.result.impl.CrowListResult;
 import org.teamswift.crow.rest.service.CrowDataStructureService;
 import org.teamswift.crow.rest.utils.CrowBeanUtils;
+import org.teamswift.crow.rest.utils.CrowMessageUtil;
 import org.teamswift.crow.rest.utils.Scaffolds;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +26,6 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.criteria.*;
-import javax.servlet.http.HttpServletRequest;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
@@ -131,7 +129,9 @@ public class CrowDBServiceJpa<
                     }
 
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                    throw new InternalServerException("An error occurred when building the query:" + e.getMessage());
+                    throw new InternalServerException(
+                            CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getMessage())
+                    );
                 }
             }
 
@@ -192,7 +192,7 @@ public class CrowDBServiceJpa<
         Class<T> domainCls = getEntityCls();
 
         T exists = findById(id).orElseThrow(() -> {
-            throw new DataNotFoundException(ErrorMessages.NotFoundByID.getMessage());
+            throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
         });
 
         EntityMeta entityConfiguration = dataStructureService.getEntitiesDataStructureMap().get(
@@ -200,7 +200,9 @@ public class CrowDBServiceJpa<
         );
 
         if(entityConfiguration == null) {
-            throw new InternalServerException("Your Entity must be managed by crow before your call this method. For example: YourEntity extends BaseCrowEntity");
+            throw new InternalServerException(
+                    CrowMessageUtil.error(CrowErrorMessage.EntityMustManagedByCrow)
+            );
         }
 
         Map<String, FieldStructure> fieldsMap = entityConfiguration.getFieldsMap();

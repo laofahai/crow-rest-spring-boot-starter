@@ -3,10 +3,12 @@ package org.teamswift.crow.rest.result;
 import org.teamswift.crow.rest.common.ICrowIO;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
 import org.teamswift.crow.rest.exception.BusinessException;
+import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.InternalServerException;
 import org.teamswift.crow.rest.result.impl.CrowErrorResult;
 import org.teamswift.crow.rest.result.impl.CrowListResult;
 import org.teamswift.crow.rest.utils.CrowBeanUtils;
+import org.teamswift.crow.rest.utils.CrowMessageUtil;
 import org.teamswift.crow.rest.utils.DozerUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +33,9 @@ public class CrowResult {
             result.setData(data);
             return result;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new InternalServerException("An error occurred while using custom result-class:" + e.getMessage());
+            throw new InternalServerException(
+                    CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getMessage())
+            );
         }
     }
 
@@ -69,7 +73,9 @@ public class CrowResult {
                     Object.class, Integer.class, Integer.class, Integer.class
             ).newInstance(data, totalItems, page, pageSize);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new InternalServerException("An error occurred while using custom result-class:" + e.getMessage());
+            throw new InternalServerException(
+                    CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getMessage())
+            );
         }
     }
 

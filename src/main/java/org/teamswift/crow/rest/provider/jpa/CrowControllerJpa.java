@@ -8,15 +8,15 @@ import org.teamswift.crow.rest.common.ICrowDBService;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.common.ICrowIO;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
-import org.teamswift.crow.rest.exception.ErrorMessages;
+import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.DataNotFoundException;
 import org.teamswift.crow.rest.handler.RequestBodyResolveHandler;
 import org.teamswift.crow.rest.handler.requestParams.RequestBodyResolved;
 import org.teamswift.crow.rest.result.CrowResult;
 import org.teamswift.crow.rest.result.ICrowListResult;
 import org.teamswift.crow.rest.result.ICrowResult;
+import org.teamswift.crow.rest.utils.CrowMessageUtil;
 import org.teamswift.crow.rest.utils.DozerUtils;
-import org.teamswift.crow.rest.utils.GenericUtils;
 import org.teamswift.crow.rest.utils.Scaffolds;
 
 import javax.persistence.EntityManager;
@@ -68,7 +68,7 @@ abstract public class CrowControllerJpa<
             return CrowResult.ofSuccess(mapped);
         }
 
-        throw new DataNotFoundException(ErrorMessages.NotFoundByID.getMessage());
+        throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -93,7 +93,7 @@ abstract public class CrowControllerJpa<
     public ICrowResult<?> delete(@PathVariable ID id) {
         ICrowDBService<ID, T> provider = getCrowProvider();
         T entity = provider.findOneById(id).orElseThrow(() -> {
-            throw new DataNotFoundException(ErrorMessages.NotFoundByID.getMessage());
+            throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
         });
         T deleted = provider.softDelete(entity);
 
@@ -121,7 +121,7 @@ abstract public class CrowControllerJpa<
     public ICrowResult<?> destroy(@PathVariable ID id) {
         ICrowDBService<ID, T> provider = getCrowProvider();
         T entity = provider.findOneById(id).orElseThrow(() -> {
-            throw new DataNotFoundException(ErrorMessages.NotFoundByID.getMessage());
+            throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
         });
         provider.destroy(entity);
 
@@ -133,7 +133,7 @@ abstract public class CrowControllerJpa<
     public ICrowResult<V> restore(@PathVariable ID id) {
         ICrowDBService<ID, T> provider = getCrowProvider();
         T entity = provider.findOneById(id).orElseThrow(() -> {
-            throw new DataNotFoundException(ErrorMessages.NotFoundByID.getMessage());
+            throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
         });
         entity = provider.restore(entity);
 

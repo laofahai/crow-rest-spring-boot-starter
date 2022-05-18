@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import org.teamswift.crow.rest.common.ICrowEntity;
+import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.ParameterInvalidException;
 import org.teamswift.crow.rest.handler.requestParams.FilterItem;
 import org.teamswift.crow.rest.handler.requestParams.QueryOperator;
 import org.teamswift.crow.rest.handler.requestParams.RequestBodyResolved;
 import org.teamswift.crow.rest.utils.CrowBeanUtils;
+import org.teamswift.crow.rest.utils.CrowMessageUtil;
 import org.teamswift.crow.rest.utils.NamingUtils;
 import org.teamswift.crow.rest.utils.Scaffolds;
 import org.springframework.data.domain.Sort;
@@ -49,7 +51,7 @@ public class RequestBodyResolveHandler {
 
         Enumeration<String> params = request.getParameterNames();
 
-        Map<String, Field> fields = Scaffolds.getAllDeclareFields(entityCls);
+        Map<String, Field> fields = Scaffolds.getAllDeclareFieldsMap(entityCls);
         List<String> existsFields = new ArrayList<>(fields.keySet());
 
         // 解析所有 get 请求参数
@@ -188,7 +190,9 @@ public class RequestBodyResolveHandler {
                         operator = QueryOperator.BTW;
                         value = Arrays.asList(strValue.replaceAll(",", "\\|").split("\\|"));
                         if (((List<String>) value).size() < 2) {
-                            throw new ParameterInvalidException("区间查询需要两个条件");
+                            throw new ParameterInvalidException(
+                                    CrowMessageUtil.error(CrowErrorMessage.BetweenQueryNeedTwoParams)
+                            );
                         }
                         break;
                     case ")":
