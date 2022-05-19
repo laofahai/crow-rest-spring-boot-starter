@@ -8,22 +8,28 @@
 
 # Getting started
 ## Installation
-This package is not publish to the Maven Repository yet, so you can [download the release] and import to your package manually like this:
-
-### from maven repository
-Not finish yet, I'll publish a release when it's works stable.
-### from jar
+The release in maven repository is hosted on Github, so add a new repository to your `pom.xml`:
+```xml
+<repositories>
+    ...
+    <repository>
+        <id>crow-maven-repository</id>
+        <name>crow-rest-spring-boot-starter</name>
+        <url>https://raw.github.com/laofahai/crow-maven-repository/master/</url>
+    </repository>
+</repositories>
+```
+and:
 ```xml
 <dependency>
     <groupId>org.teamswift</groupId>
     <artifactId>crow-rest-spring-boot-starter</artifactId>
     <version>${crow-rest.version}</version>
-    <systemPath>/path/to/the/jar</systemPath>
 </dependency>
 ```
-## Configuration
 
-### in your main application
+## Configuration
+### in your main class
 First of all, you should configure the `@SpringBootApplication` annotation for your application can scan crow beans.
 ```java
 @SpringBootApplication(
