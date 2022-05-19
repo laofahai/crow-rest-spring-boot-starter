@@ -14,7 +14,7 @@ The release in maven repository is hosted on Github, so add a new repository to 
     ...
     <repository>
         <id>crow-maven-repository</id>
-        <name>crow-rest-spring-boot-starter</name>
+        <name>crow-maven</name>
         <url>https://raw.github.com/laofahai/crow-maven-repository/master/</url>
     </repository>
 </repositories>

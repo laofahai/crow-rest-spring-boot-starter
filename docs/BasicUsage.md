@@ -66,13 +66,13 @@ public class BookController extends CrowControllerJpa<
 ```
 
 ## That's all
-Now you can do the CRUD operation to the Book:
+Now you can do the CRUD operation to the Book via:
 * `POST /my/book` for create a new book
 * `PUT /my/book/{id}` for update book information
 * `GET /my/book` for books list
 * `PUT /my/book/restore/{id}` for restore the soft-deleted book
-* `PUT /my/book/restoreBatch/{ids}` for restore the soft-deleted books via `ids` like
+* `PUT /my/book/restoreBatch/{ids}` for restore the soft-deleted books via `ids` like `1,2,3`
 * `DELETE /my/book/{id}` for soft-delete a book
+* `DELETE /my/book/batch/{ids}` for batch soft-delete books via `ids` like `1,2,3`
 * `DELETE /my/book/destroy/{id}` for destroy a book from database
 * `DELETE /my/book/destroyBatch/{id}` for destroy books from database
-* `DELETE /my/book/batch/{ids}` for batch soft-delete books via `ids` like `1,2,3`
