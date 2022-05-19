@@ -9,6 +9,7 @@ public enum CrowErrorMessage {
     EntityMustManagedByCrow,
     CustomResultClass,
     ConvertIDStringToGeneric,
+    EntityNotBeenSoftDeleted,
 
     BetweenQueryNeedTwoParams,
     BetweenQueryNeedParamForArray,

@@ -18,6 +18,8 @@ public interface ICrowDBService<ID, T extends ICrowEntity<ID, ?>> {
 
     ICrowListResult<T> findAllByIdsIn(Collection<ID> idList);
 
+    ICrowListResult<T> findAllByIdsIn(Collection<ID> idList, boolean onlyTrash);
+
     Optional<T> findOneById(ID id);
 
     Optional<T> findOneBy(String path, Object value);
@@ -36,6 +38,6 @@ public interface ICrowDBService<ID, T extends ICrowEntity<ID, ?>> {
 
     void destroy(T entity);
 
-    void destroyBatch(Collection<T> entities);
+    int destroyBatch(Collection<ID> idList);
 
 }

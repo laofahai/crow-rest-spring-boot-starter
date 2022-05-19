@@ -92,7 +92,7 @@ public class CrowDataStructureService {
 
                 String voLabel = String.format("%s.%s", apiPath, field.getName());
                 voLabel = CrowMessageUtil.entityLabel(voLabel);
-                if(voFs.getLabel().equals(voLabel)) {
+                if(Strings.isNullOrEmpty(voFs.getLabel()) || voFs.getLabel().equals(voLabel)) {
                     voFs.setLabel(fs.getLabel());
                 }
 

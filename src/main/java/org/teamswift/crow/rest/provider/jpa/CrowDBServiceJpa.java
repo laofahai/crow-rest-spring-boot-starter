@@ -67,19 +67,29 @@ public class CrowDBServiceJpa<
         return entityManager;
     }
 
+
+
     @Override
-    public ICrowListResult<T> findAllByIdsIn(Collection<ID> idList) {
+    public ICrowListResult<T> findAllByIdsIn(Collection<ID> idList, boolean onlyDeleted) {
         RequestBodyResolved bodyResolved = new RequestBodyResolved();
         List<FilterItem> filterItems = new ArrayList<>(){{
             add(new FilterItem(
                     "id", QueryOperator.IN, idList
             ));
         }};
+        bodyResolved.setOnlyDeleted(onlyDeleted);
         bodyResolved.setFilterItems(filterItems);
         bodyResolved.setPage(1);
         bodyResolved.setPageSize(idList.size());
+        bodyResolved.setSortOrders(RequestBodyResolveHandler.handleSortItem("-id"));
 
         return findAll(bodyResolved);
+    }
+
+
+    @Override
+    public ICrowListResult<T> findAllByIdsIn(Collection<ID> idList) {
+        return findAllByIdsIn(idList, false);
     }
 
     @Override
@@ -252,16 +262,7 @@ public class CrowDBServiceJpa<
 
     @Override
     public int restoreBatch(Collection<ID> idList) {
-
-        RequestBodyResolved body = new RequestBodyResolved();
-        body.setFilterItems(new ArrayList<>() {{
-            add(new FilterItem("id", QueryOperator.IN, idList));
-        }});
-        body.setPage(1);
-        body.setPageSize(idList.size());
-        body.setOnlyDeleted(true);
-        body.setSortOrders(RequestBodyResolveHandler.handleSortItem("-id"));
-        ICrowListResult<T> result = findAll(body);
+        ICrowListResult<T> result = findAllByIdsIn(idList, true);
 
         String hql = String.format("update %s e set e.deletedDate = null where e in :entities", getEntityCls().getSimpleName());
         Query query = getEntityManager().createQuery(hql);
@@ -275,11 +276,18 @@ public class CrowDBServiceJpa<
     }
 
     @Override
-    public void destroyBatch(Collection<T> entities) {
-        deleteAllInBatch(entities);
+    public int destroyBatch(Collection<ID> idList) {
+        ICrowListResult<T> result = findAllByIdsIn(idList, true);
+
+        String hql = String.format("delete from %s e where e in :entities", getEntityCls().getSimpleName());
+        Query query = getEntityManager().createQuery(hql);
+        query.setParameter("entities", result.getData());
+        return query.executeUpdate();
     }
 
     public Class<T> getEntityCls() {
         return entityCls;
     }
+
+
 }

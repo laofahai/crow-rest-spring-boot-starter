@@ -8,6 +8,7 @@ import org.teamswift.crow.rest.common.ICrowDBService;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.common.ICrowIO;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
+import org.teamswift.crow.rest.exception.BusinessException;
 import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.DataNotFoundException;
 import org.teamswift.crow.rest.handler.RequestBodyResolveHandler;
@@ -123,9 +124,29 @@ abstract public class CrowControllerJpa<
         T entity = provider.findOneById(id).orElseThrow(() -> {
             throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
         });
+
+        if(!entity.isDeleted()) {
+            throw new BusinessException(CrowMessageUtil.error(CrowErrorMessage.EntityNotBeenSoftDeleted));
+        }
+
         provider.destroy(entity);
 
         return CrowResult.ofSuccess("");
+    }
+
+    /**
+     * @param ids
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.DELETE, value = "/destroyBatch/{ids}")
+    @Transactional
+    public ICrowResult<?> destroyBatch(@PathVariable String ids) {
+        List<ID> idList = Scaffolds.parseIdStringToGeneric(ids, getIdCls());
+
+        ICrowDBService<ID, T> provider = getCrowProvider();
+        int num = provider.destroyBatch(idList);
+
+        return CrowResult.ofSuccess(num);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/restore/{id}")
