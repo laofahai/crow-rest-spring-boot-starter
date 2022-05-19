@@ -1,6 +1,8 @@
 package org.teamswift.crow.rest.provider.jpa;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamswift.crow.rest.common.ICrowDBService;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
@@ -53,6 +55,8 @@ public class CrowDBServiceJpa<
 
     private final Class<T> entityCls;
 
+    private final Logger logger = LoggerFactory.getLogger(CrowDBServiceJpa.class);
+
     public CrowDBServiceJpa(Class<T> domainClass, EntityManager em) {
         super(domainClass, em);
         entityCls = domainClass;
@@ -66,8 +70,6 @@ public class CrowDBServiceJpa<
     public EntityManager getEntityManager() {
         return entityManager;
     }
-
-
 
     @Override
     public ICrowListResult<T> findAllByIdsIn(Collection<ID> idList, boolean onlyDeleted) {
@@ -139,6 +141,7 @@ public class CrowDBServiceJpa<
                     }
 
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                    logger.error("Error while using custom-result-class: {}", e.getMessage());
                     throw new InternalServerException(
                             CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getMessage())
                     );
@@ -197,7 +200,7 @@ public class CrowDBServiceJpa<
     }
 
     @Override
-    public T update(ID id, T entity) {
+    public T update(ID id, T dto) {
 
         Class<T> domainCls = getEntityCls();
 
@@ -210,8 +213,9 @@ public class CrowDBServiceJpa<
         );
 
         if(entityConfiguration == null) {
+            logger.error("Entity not managed by crow: {}", domainCls.getSimpleName());
             throw new InternalServerException(
-                    CrowMessageUtil.error(CrowErrorMessage.EntityMustManagedByCrow)
+                    CrowMessageUtil.error(CrowErrorMessage.EntityMustManagedByCrow, domainCls.getSimpleName())
             );
         }
 
@@ -222,16 +226,18 @@ public class CrowDBServiceJpa<
                 continue;
             }
 
+            Object value = null;
             try {
                 // get new value
-                PropertyDescriptor pd = new PropertyDescriptor(fieldName, entity.getClass());
+                PropertyDescriptor pd = new PropertyDescriptor(fieldName, dto.getClass());
                 Method readMethod = pd.getReadMethod();
-                Object value = readMethod.invoke(entity);
+                value = readMethod.invoke(dto);
 
                 PropertyDescriptor pdExists = new PropertyDescriptor(fieldName, domainCls);
                 Method method = pdExists.getWriteMethod();
                 method.invoke(exists, value);
             } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
+                logger.warn("Error while set entity property {} in {}, value: {}", fieldName, dto.getClass(), value);
                 continue;
             }
         }

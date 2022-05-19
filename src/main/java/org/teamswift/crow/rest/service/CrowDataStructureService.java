@@ -5,6 +5,8 @@ import jdk.jfr.Label;
 import lombok.Getter;
 import org.hibernate.metamodel.internal.MetamodelImpl;
 import org.hibernate.persister.entity.EntityPersister;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -40,6 +42,8 @@ public class CrowDataStructureService {
 
     private final Map<Class<? extends ICrowEntity<?, ?>>, Class<? extends ICrowIO>> entityVoMap = new HashMap<>();
 
+    private final Logger logger = LoggerFactory.getLogger(CrowDataStructureService.class);
+
     public CrowDataStructureService(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.register();
@@ -55,6 +59,9 @@ public class CrowDataStructureService {
 
             // only handle the entities belongs to ICrowEntity
             if(!ICrowEntity.class.isAssignableFrom(entityClsRaw)) {
+                logger.warn(
+                        "The entity {} is not managed by crow", entityClsRaw.getName()
+                );
                 continue;
             }
 
@@ -119,6 +126,9 @@ public class CrowDataStructureService {
         try {
             pd = new PropertyDescriptor(field.getName(), cls);
         } catch (IntrospectionException e) {
+            logger.warn(
+                    "Error while instance a new PropertyDescriptor for the field {} in {} ", field.getName(), cls.getName()
+            );
             return fs;
         }
         // Field Type
