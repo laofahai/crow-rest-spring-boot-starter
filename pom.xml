@@ -4,13 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.teamswift</groupId>
     <artifactId>crow-rest-spring-boot-starter</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>crow-rest</name>
     <description>A quick-starter based on SpringBoot to handle common CRUD operations.</description>
     <properties>
         <java.version>11</java.version>
         <dozer.version>5.5.1</dozer.version>
-        <spring-boot.version>2.6.7</spring-boot.version>
+        <spring-boot.version>2.7.0</spring-boot.version>
         <github.global.server>crow-maven-repository-github</github.global.server>
     </properties>
     <dependencies>
