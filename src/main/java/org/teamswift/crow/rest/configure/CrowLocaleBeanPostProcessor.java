@@ -16,8 +16,7 @@ public class CrowLocaleBeanPostProcessor implements BeanPostProcessor {
         if(bean instanceof MessageSource) {
             ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 
-            messageSource.setBasenames(
-                    "i18n/messages",
+            messageSource.addBasenames(
                     "i18n/crow-rest"
             );
             messageSource.setDefaultEncoding("UTF-8");

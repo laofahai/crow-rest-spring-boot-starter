@@ -4,6 +4,7 @@ import lombok.Getter;
 
 public enum CrowErrorMessage {
 
+    NotFound,
     NotFoundByID,
     ErrorWhenInstance,
     EntityMustManagedByCrow,
