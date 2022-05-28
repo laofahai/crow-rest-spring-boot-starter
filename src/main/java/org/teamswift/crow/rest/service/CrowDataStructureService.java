@@ -69,6 +69,10 @@ public class CrowDataStructureService {
 
             Class<? extends ICrowVo> voCls = (Class<? extends ICrowVo>) GenericUtils.get(entityCls, 1);
 
+            if(voCls == null) {
+                continue;
+            }
+
             // api path
             String apiPath = getApiPath(entityCls);
 
