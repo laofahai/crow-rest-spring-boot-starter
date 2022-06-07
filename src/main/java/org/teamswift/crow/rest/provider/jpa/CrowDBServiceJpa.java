@@ -141,9 +141,9 @@ public class CrowDBServiceJpa<
                     }
 
                 } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                    logger.error("Error while using custom-result-class: {}", e.getMessage());
+                    logger.error("Error while using custom-result-class: {}", e.getLocalizedMessage());
                     throw new InternalServerException(
-                            CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getMessage())
+                            CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getLocalizedMessage())
                     );
                 }
             }

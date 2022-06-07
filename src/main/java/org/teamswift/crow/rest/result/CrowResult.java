@@ -1,5 +1,6 @@
 package org.teamswift.crow.rest.result;
 
+import org.springframework.http.HttpStatus;
 import org.teamswift.crow.rest.common.ICrowIO;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
 import org.teamswift.crow.rest.exception.BusinessException;
@@ -23,6 +24,22 @@ public class CrowResult {
         return new CrowErrorResult(e);
     }
 
+    static public CrowErrorResult ofError(Exception e) {
+        if(e instanceof BusinessException) {
+            return new CrowErrorResult((BusinessException) e);
+        }
+        CrowErrorResult result = new CrowErrorResult();
+        result.setHttpStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        result.setSuccess(false);
+        result.setData(e.getLocalizedMessage());
+        result.setResultCode(CrowResultCode.SYSTEM_INNER_ERROR);
+        result.setTitle(
+                CrowMessageUtil.get("crow.titles.errorOccurred")
+        );
+
+        return result;
+    }
+
     static public <E> ICrowResult<E> ofSuccess(E data) {
         return ofSuccess(data, properties.getDefaultResultClass());
     }
@@ -34,7 +51,7 @@ public class CrowResult {
             return result;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new InternalServerException(
-                    CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getMessage())
+                    CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getLocalizedMessage())
             );
         }
     }
@@ -74,7 +91,7 @@ public class CrowResult {
             ).newInstance(data, totalItems, page, pageSize);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new InternalServerException(
-                    CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getMessage())
+                    CrowMessageUtil.error(CrowErrorMessage.CustomResultClass, e.getLocalizedMessage())
             );
         }
     }

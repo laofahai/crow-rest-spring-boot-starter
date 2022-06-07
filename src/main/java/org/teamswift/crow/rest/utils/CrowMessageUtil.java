@@ -4,6 +4,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.teamswift.crow.rest.exception.CrowErrorMessage;
+import org.teamswift.crow.rest.exception.ICrowErrorMessage;
 import org.teamswift.crow.rest.result.CrowResultCode;
 
 @Component
@@ -31,13 +32,17 @@ public class CrowMessageUtil {
         }
     }
 
-    public static String error(CrowErrorMessage crowErrorMessage, Object ...args) {
-        String key = String.format("crow.error.%s", crowErrorMessage.name());
+    public static String error(String prefix, ICrowErrorMessage crowErrorMessage, Object ...args) {
+        String key = String.format("%s.%s", prefix, crowErrorMessage.name());
         try {
             return messageSource.getMessage(key, args, LocaleContextHolder.getLocale());
         } catch (Exception e) {
             return key;
         }
+    }
+
+    public static String error(ICrowErrorMessage crowErrorMessage, Object ...args) {
+        return error("crow.error", crowErrorMessage, args);
     }
 
     public static String resultCode(CrowResultCode crowResultCode, Object ...args) {

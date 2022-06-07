@@ -212,7 +212,7 @@ public class Scaffolds {
                 return (ID) method.invoke(null, id);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                 throw new InternalServerException(
-                        CrowMessageUtil.error(CrowErrorMessage.ConvertIDStringToGeneric, e.getMessage())
+                        CrowMessageUtil.error(CrowErrorMessage.ConvertIDStringToGeneric, e.getLocalizedMessage())
                 );
             }
         }).collect(Collectors.toList());
