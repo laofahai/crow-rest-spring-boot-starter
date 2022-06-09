@@ -207,16 +207,18 @@ public class CrowDataStructureService {
         if(type.isEnum()) {
             fs.setType(DataType.ENUM);
             fs.setChoices(EnumUtils.enumToListMap(type));
-        } else if(t == null && ICrowEntity.class.isAssignableFrom(type)) {
-            // foreign
-            if(type.isAnnotationPresent(ForeignDisplayField.class)) {
-                fs.setForeignDisplayField(type.getAnnotation(ForeignDisplayField.class).value());
-            } else {
-                fs.setForeignDisplayField("name");
+        } else if(ICrowEntity.class.isAssignableFrom(type)) {
+            if(t == null) {
+                // foreign
+                if(type.isAnnotationPresent(ForeignDisplayField.class)) {
+                    fs.setForeignDisplayField(type.getAnnotation(ForeignDisplayField.class).value());
+                } else {
+                    fs.setForeignDisplayField("name");
+                }
+                String foreignApiPath = getApiPath(type);
+                fs.setForeignApi(foreignApiPath);
+                fs.setType(DataType.FOREIGN);
             }
-            String foreignApiPath = getApiPath(type);
-            fs.setForeignApi(foreignApiPath);
-            fs.setType(DataType.FOREIGN);
         } else {
             String simpleName = type.getSimpleName().toUpperCase();
             switch (simpleName) {
@@ -232,9 +234,11 @@ public class CrowDataStructureService {
                     fs.setType(DataType.TEXT);
                     break;
                 default:
-                    fs.setType(DataType.valueOf(
-                            simpleName
-                    ));
+                    if(t == null) {
+                        fs.setType(DataType.valueOf(
+                                simpleName
+                        ));
+                    }
                     break;
             }
         }
