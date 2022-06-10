@@ -2,6 +2,7 @@ package org.teamswift.crow.rest.handler.requestParams;
 
 import lombok.Data;
 import org.springframework.data.domain.Sort;
+import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.handler.RequestBodyResolveHandler;
 
 import java.util.List;
@@ -22,5 +23,7 @@ public class RequestBodyResolved {
     private boolean onlyDeleted;
 
     private boolean onlyCount;
+
+    private Class<? extends ICrowEntity<?, ?>> targetEntity;
 
 }

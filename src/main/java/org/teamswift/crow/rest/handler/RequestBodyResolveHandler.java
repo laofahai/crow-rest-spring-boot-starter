@@ -159,7 +159,13 @@ public class RequestBodyResolveHandler {
         body.setPage(pageNumber);
         body.setPageSize(pageSize);
         body.setOnlyDeleted(onlyDeleted);
+        body.setTargetEntity(entityCls);
         body.setSortOrders(handleSortItem(sortStr));
+
+        Map<String, IRequestBodyResolver> beans = CrowBeanUtils.getBeans(IRequestBodyResolver.class);
+        beans.values().forEach(bean -> {
+            bean.handle(body);
+        });
 
         return body;
     }
