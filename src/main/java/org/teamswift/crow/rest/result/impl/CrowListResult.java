@@ -1,5 +1,6 @@
 package org.teamswift.crow.rest.result.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.teamswift.crow.rest.result.CrowResultCode;
 import org.teamswift.crow.rest.result.ICrowListResult;
 import lombok.Data;
@@ -15,6 +16,9 @@ public class CrowListResult<T> implements ICrowListResult<T> {
 
     private boolean success = true;
 
+    private int status;
+
+    @JsonIgnore
     private HttpStatus httpStatus = HttpStatus.OK;
 
     private CrowResultCode resultCode;
@@ -35,4 +39,9 @@ public class CrowListResult<T> implements ICrowListResult<T> {
         this.page = page;
         this.pageSize = pageSize;
     }
+
+    public int getStatus() {
+        return getResultCode() == null ? 200 : getResultCode().getCode();
+    }
+
 }

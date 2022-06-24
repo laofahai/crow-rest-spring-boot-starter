@@ -3,9 +3,13 @@ package org.teamswift.crow.rest.utils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
-import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.ICrowErrorMessage;
 import org.teamswift.crow.rest.result.CrowResultCode;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Locale;
+import java.util.Properties;
 
 @Component
 public class CrowMessageUtil {
@@ -22,6 +26,25 @@ public class CrowMessageUtil {
         } catch (Exception e) {
             return key;
         }
+    }
+
+    public static Properties getAll(String localeName) {
+        try {
+            Locale locale = Locale.forLanguageTag(localeName);
+            Method method = messageSource.getClass().getDeclaredMethod("getMergedProperties", Locale.class);
+            method.setAccessible(true);
+            Object propertiesHolder = method.invoke(messageSource, locale);
+            method.setAccessible(false);
+            Method innerMethod = propertiesHolder.getClass().getDeclaredMethod("getProperties");
+            innerMethod.setAccessible(true);
+            Properties properties = (Properties) innerMethod.invoke(propertiesHolder);
+            innerMethod.setAccessible(false);
+
+            return properties;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String entityLabel(String apiPathDotField, Object ...args) {

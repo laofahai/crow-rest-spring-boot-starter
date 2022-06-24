@@ -1,5 +1,6 @@
 package org.teamswift.crow.rest.result.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.teamswift.crow.rest.result.CrowResultCode;
 import org.teamswift.crow.rest.result.ICrowResult;
 import lombok.Data;
@@ -14,8 +15,11 @@ public class CrowDefaultResult<T> implements ICrowResult<T> {
 
     private T data;
 
+    private int status;
+
     private CrowResultCode resultCode = CrowResultCode.SUCCESS;
 
+    @JsonIgnore
     private final int httpStatusCode = HttpStatus.OK.value();
 
     public CrowDefaultResult(T data) {
@@ -25,6 +29,11 @@ public class CrowDefaultResult<T> implements ICrowResult<T> {
     @Override
     public T getData() {
         return data;
+    }
+
+    @Override
+    public int getStatus() {
+        return getResultCode() == null ? 200 : getResultCode().getCode();
     }
 
 }

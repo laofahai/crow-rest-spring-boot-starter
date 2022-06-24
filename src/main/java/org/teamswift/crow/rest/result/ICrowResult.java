@@ -14,4 +14,8 @@ public interface ICrowResult<T> extends Serializable {
 
     void setData(T data);
 
+    default int getStatus() {
+        return getResultCode() == null ? 200 : getResultCode().getCode();
+    }
+
 }

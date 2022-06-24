@@ -8,17 +8,30 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.teamswift.crow.rest.utils.CrowBeanUtils;
 
 @Configuration
 @EnableConfigurationProperties(CrowServiceProperties.class)
-public class CrowAutoConfigure {
+public class CrowAutoConfigure implements WebMvcConfigurer {
 
     private final CrowServiceProperties properties;
 
     public CrowAutoConfigure(CrowServiceProperties properties, ApplicationContext context) {
         this.properties = properties;
         CrowBeanUtils.setApplicationContext(context);
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        //添加映射路径
+        registry.addMapping("/**")
+                .allowCredentials(false)
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .exposedHeaders("*");
     }
 
     @Bean

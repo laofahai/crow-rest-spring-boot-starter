@@ -33,9 +33,6 @@ public class CrowResult {
         result.setSuccess(false);
         result.setData(e.getLocalizedMessage());
         result.setResultCode(CrowResultCode.SYSTEM_INNER_ERROR);
-        result.setTitle(
-                CrowMessageUtil.get("crow.titles.errorOccurred")
-        );
 
         return result;
     }

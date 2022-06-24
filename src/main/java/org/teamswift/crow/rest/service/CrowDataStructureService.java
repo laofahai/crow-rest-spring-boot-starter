@@ -19,7 +19,6 @@ import org.teamswift.crow.rest.common.ICrowVo;
 import org.teamswift.crow.rest.handler.dataStructure.DataType;
 import org.teamswift.crow.rest.handler.dataStructure.EntityMeta;
 import org.teamswift.crow.rest.handler.dataStructure.FieldStructure;
-import org.teamswift.crow.rest.utils.CrowMessageUtil;
 import org.teamswift.crow.rest.utils.EnumUtils;
 import org.teamswift.crow.rest.utils.GenericUtils;
 import org.teamswift.crow.rest.utils.Scaffolds;
@@ -82,11 +81,9 @@ public class CrowDataStructureService {
             if(entityCls.isAnnotationPresent(Label.class)) {
                 entityLabel = entityCls.getAnnotation(Label.class).value();
             } else if(entityCls.isAnnotationPresent(I18N.class)) {
-                entityLabel = CrowMessageUtil.get(
-                        entityCls.getAnnotation(I18N.class).value()
-                );
+                entityLabel = entityCls.getAnnotation(I18N.class).value();
             } else {
-                entityLabel = CrowMessageUtil.entityLabel(apiPath);
+                entityLabel = apiPath;
             }
 
             // vo class
@@ -102,7 +99,7 @@ public class CrowDataStructureService {
                 FieldStructure voFs = parseFieldStructure(field, voCls, apiPath);
 
                 String voLabel = String.format("%s.%s", apiPath, field.getName());
-                voLabel = CrowMessageUtil.entityLabel(voLabel);
+                voLabel = voLabel;
                 if(Strings.isNullOrEmpty(voFs.getLabel()) || voFs.getLabel().equals(voLabel)) {
                     voFs.setLabel(fs.getLabel());
                 }
@@ -195,10 +192,9 @@ public class CrowDataStructureService {
         if(label != null && !Strings.isNullOrEmpty(label.value())) {
             fs.setLabel(label.value());
         } else if(i18N != null) {
-            fs.setLabel(CrowMessageUtil.get(i18N.value()));
+            fs.setLabel(i18N.value());
         } else {
             String labelDisplay = String.format("%s.%s", apiPath, field.getName());
-            labelDisplay = CrowMessageUtil.entityLabel(labelDisplay);
             fs.setLabel(labelDisplay);
         }
 
