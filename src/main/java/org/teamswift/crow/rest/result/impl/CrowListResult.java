@@ -6,6 +6,7 @@ import org.teamswift.crow.rest.result.ICrowListResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.teamswift.crow.rest.result.ICrowResultCode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +22,7 @@ public class CrowListResult<T> implements ICrowListResult<T> {
     @JsonIgnore
     private HttpStatus httpStatus = HttpStatus.OK;
 
-    private CrowResultCode resultCode;
+    private ICrowResultCode resultCode;
 
     private Collection<T> data = new ArrayList<>();
 

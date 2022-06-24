@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.teamswift.crow.rest.exception.BusinessException;
-import org.teamswift.crow.rest.result.CrowResultCode;
 import org.teamswift.crow.rest.result.ICrowResult;
+import org.teamswift.crow.rest.result.ICrowResultCode;
 import org.teamswift.crow.rest.utils.CrowMessageUtil;
 
 @Data
@@ -20,7 +20,7 @@ public class CrowErrorResult implements ICrowResult<String> {
 
     private int status;
 
-    private CrowResultCode resultCode;
+    private ICrowResultCode resultCode;
 
     @JsonIgnore
     private int httpStatusCode;

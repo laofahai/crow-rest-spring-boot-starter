@@ -6,6 +6,7 @@ import org.teamswift.crow.rest.result.ICrowResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.teamswift.crow.rest.result.ICrowResultCode;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +18,7 @@ public class CrowDefaultResult<T> implements ICrowResult<T> {
 
     private int status;
 
-    private CrowResultCode resultCode = CrowResultCode.SUCCESS;
+    private ICrowResultCode resultCode = CrowResultCode.SUCCESS;
 
     @JsonIgnore
     private final int httpStatusCode = HttpStatus.OK.value();

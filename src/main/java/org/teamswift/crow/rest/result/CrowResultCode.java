@@ -6,7 +6,7 @@ import org.teamswift.crow.rest.utils.CrowMessageUtil;
 
 @AllArgsConstructor
 @Getter
-public enum CrowResultCode {
+public enum CrowResultCode implements ICrowResultCode{
     SUCCESS(200),
     CONFIRM_CONTINUE(2001),
     PARAM_IS_INVALID(10001),
@@ -26,14 +26,12 @@ public enum CrowResultCode {
     RESOURCE_NOT_EXISTED(70003),
     ;
 
-    private final Integer code;
+    private final int code;
 
     @Override
     public String toString() {
         return getMessage();
     }
 
-    public String getMessage() {
-        return CrowMessageUtil.resultCode(this);
-    }
+
 }

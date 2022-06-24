@@ -7,9 +7,9 @@ import java.util.Collection;
 
 public interface ICrowListResult<T> extends Serializable {
 
-    CrowResultCode getResultCode();
+    ICrowResultCode getResultCode();
 
-    void setResultCode(CrowResultCode code);
+    void setResultCode(ICrowResultCode code);
 
     boolean isSuccess();
 

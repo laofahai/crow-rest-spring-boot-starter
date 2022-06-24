@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.teamswift.crow.rest.result.ICrowResultCode;
 
 @EqualsAndHashCode(callSuper = true)
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -15,7 +16,7 @@ public class BusinessException extends RuntimeException {
 
 	protected String title;
 
-	protected CrowResultCode resultCode;
+	protected ICrowResultCode resultCode;
 
 	protected String body;
 
@@ -52,7 +53,7 @@ public class BusinessException extends RuntimeException {
 		this.body = data.toString();
 	}
 
-	public CrowResultCode getResultCode() {
+	public ICrowResultCode getResultCode() {
 		return resultCode == null ? CrowResultCode.SYSTEM_INNER_ERROR : resultCode;
 	}
 }

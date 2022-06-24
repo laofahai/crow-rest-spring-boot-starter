@@ -4,6 +4,7 @@ import org.teamswift.crow.rest.exception.impl.*;
 import org.teamswift.crow.rest.result.CrowResultCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+import org.teamswift.crow.rest.result.ICrowResultCode;
 
 @Getter
 public enum BusinessExceptionEnum {
@@ -42,9 +43,9 @@ public enum BusinessExceptionEnum {
 
 	private final HttpStatus httpStatus;
 
-	private final CrowResultCode resultCode;
+	private final ICrowResultCode resultCode;
 
-	BusinessExceptionEnum(Class<? extends BusinessException> eClass, HttpStatus httpStatus, CrowResultCode resultCode) {
+	BusinessExceptionEnum(Class<? extends BusinessException> eClass, HttpStatus httpStatus, ICrowResultCode resultCode) {
 		this.eClass = eClass;
 		this.httpStatus = httpStatus;
 		this.resultCode = resultCode;
@@ -98,7 +99,7 @@ public enum BusinessExceptionEnum {
 		return null;
 	}
 
-	public static BusinessExceptionEnum getByCode(CrowResultCode resultCode) {
+	public static BusinessExceptionEnum getByCode(ICrowResultCode resultCode) {
 
 		if(resultCode == null) {
 			return null;
