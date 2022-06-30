@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Data
 @MappedSuperclass
-public class BaseCrowEntity {
+abstract public class BaseCrowEntity<ID, V extends ICrowIO> implements ICrowEntity<ID, V> {
 
     @I18N("DeletedAt")
     @SystemGeneratedValue
@@ -20,20 +20,25 @@ public class BaseCrowEntity {
 
     @Transient
     @I18N("IsDeleted")
+    @SystemGeneratedValue
     private boolean deleted;
 
     @CreatedDate
     @I18N("CreatedAt")
+    @SystemGeneratedValue
     private Date createdAt;
 
     @LastModifiedDate
     @I18N("ModifiedAt")
+    @SystemGeneratedValue
     private Date modifiedAt;
 
+    @Override
     public void setDeleted(boolean deleted) {
         this.deletedDate = deleted ? new Date() : null;
     }
 
+    @Override
     public boolean isDeleted() {
         return deletedDate != null;
     }

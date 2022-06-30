@@ -86,7 +86,7 @@ public class RequestBodyResolveHandler {
                     filtersStr = value;
                     break;
                 case "_ot":
-                    onlyDeleted = value.equals("1");
+                    onlyDeleted = "1".equals(value);
                     filtersRaw.add(new FilterItem("deletedDate",
                             onlyDeleted ? QueryOperator.NEQ : QueryOperator.EQ, null));
                     break;

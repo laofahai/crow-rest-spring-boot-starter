@@ -43,6 +43,11 @@ public class CrowDataStructureService {
 
     private final Logger logger = LoggerFactory.getLogger(CrowDataStructureService.class);
 
+    private final List<String> defaultFields = Arrays.asList(
+            "id", "createdBy", "modifiedBy", "createdAt", "modifiedAt", "deleted", "deletedDate",
+            "used", "organizationId"
+    );
+
     public CrowDataStructureService(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.register();
@@ -95,6 +100,11 @@ public class CrowDataStructureService {
             List<Field> fields = Scaffolds.getDeclareFieldsAll(entityCls);
 
             for(Field field: fields) {
+
+                if(defaultFields.contains(field.getName())) {
+                    continue;
+                }
+
                 FieldStructure fs = parseFieldStructure(field, entityCls, apiPath);
                 FieldStructure voFs = parseFieldStructure(field, voCls, apiPath);
 
@@ -252,7 +262,7 @@ public class CrowDataStructureService {
         } else {
             String[] raw = cls.getName().split("\\.");
             raw = Arrays.copyOfRange(raw, raw.length - 3, raw.length);
-            apiPath = String.format("%s.%s", raw[0], raw[2]);
+            apiPath = String.format("%s.%s", raw[0], Scaffolds.lcfirst(raw[2]));
         }
         return apiPath;
     }

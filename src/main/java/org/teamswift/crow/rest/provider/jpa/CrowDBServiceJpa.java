@@ -165,6 +165,7 @@ public class CrowDBServiceJpa<
         result.setPage(rawPage.getPageable().getPageNumber() + 1);
         result.setPageSize(rawPage.getPageable().getPageSize());
         result.setTotalPages(rawPage.getTotalPages());
+        result.setTotalItems(rawPage.getTotalElements());
         result.setData(rawPage.getContent());
         return result;
     }
