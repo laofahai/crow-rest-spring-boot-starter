@@ -39,7 +39,7 @@ public class CrowDataStructureService {
 
     private final Map<String, EntityMeta> voDataStructureMap = new HashMap<>();
 
-    private final Map<Class<? extends ICrowEntity<?, ?>>, Class<? extends ICrowIO>> entityVoMap = new HashMap<>();
+    private final Map<Class<? extends ICrowIO>, Class<? extends ICrowIO>> entityVoMap = new HashMap<>();
 
     private final Logger logger = LoggerFactory.getLogger(CrowDataStructureService.class);
 
@@ -62,20 +62,20 @@ public class CrowDataStructureService {
             Class<?> entityClsRaw = persist.getMappedClass();
 
             // only handle the entities belongs to ICrowEntity
-            if(!ICrowEntity.class.isAssignableFrom(entityClsRaw)) {
-                logger.warn(
-                        "The entity {} is not managed by crow", entityClsRaw.getName()
-                );
-                continue;
-            }
+//            if(!ICrowEntity.class.isAssignableFrom(entityClsRaw)) {
+//                logger.warn(
+//                        "The entity {} is not managed by crow", entityClsRaw.getName()
+//                );
+//                continue;
+//            }
 
-            Class<? extends ICrowEntity<?, ?>> entityCls = (Class<? extends ICrowEntity<?, ?>>) entityClsRaw;
+            Class<? extends ICrowIO> entityCls = (Class<? extends ICrowIO>) entityClsRaw;
 
             Class<? extends ICrowVo> voCls = (Class<? extends ICrowVo>) GenericUtils.get(entityCls, 1);
 
-            if(voCls == null) {
-                continue;
-            }
+//            if(voCls == null) {
+//                continue;
+//            }
 
             // api path
             String apiPath = getApiPath(entityCls);
@@ -106,16 +106,16 @@ public class CrowDataStructureService {
                 }
 
                 FieldStructure fs = parseFieldStructure(field, entityCls, apiPath);
-                FieldStructure voFs = parseFieldStructure(field, voCls, apiPath);
-
-                String voLabel = String.format("%s.%s", apiPath, field.getName());
-                voLabel = voLabel;
-                if(Strings.isNullOrEmpty(voFs.getLabel()) || voFs.getLabel().equals(voLabel)) {
-                    voFs.setLabel(fs.getLabel());
-                }
-
                 fieldStructureMap.put(field.getName(), fs);
-                voStructureMap.put(field.getName(), voFs);
+
+                if(voCls != null) {
+                    FieldStructure voFs = parseFieldStructure(field, voCls, apiPath);
+                    String voLabel = String.format("%s.%s", apiPath, field.getName());
+                    if(Strings.isNullOrEmpty(voFs.getLabel()) || voFs.getLabel().equals(voLabel)) {
+                        voFs.setLabel(fs.getLabel());
+                    }
+                    voStructureMap.put(field.getName(), voFs);
+                }
             }
 
             EntityMeta entityMeta = new EntityMeta();
