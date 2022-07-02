@@ -163,6 +163,8 @@ public class CrowCodeGenerator {
 
         try {
             template.process(model, out);
+            out.close();
+            fos.close();
         } catch (TemplateException | IOException e) {
             e.printStackTrace();
             return;

@@ -1,10 +1,12 @@
 package ${packageName}.${appLC}.vo;
 
 import lombok.Data;
-import org.teamswift.crow.rest.common.ICrowVo;
+import lombok.EqualsAndHashCode;
+import org.teamswift.crow.rbac.common.CrowOrgLimitedVo;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class ${module}Vo implements ICrowVo {
+public class ${module}Vo extends CrowOrgLimitedVo {
 
     private ${primaryKeyType} id;
 

@@ -34,4 +34,6 @@ public class FieldStructure implements Serializable {
 
     private boolean preload;
 
+    private boolean jsonIgnore = false;
+
 }

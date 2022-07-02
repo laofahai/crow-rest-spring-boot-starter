@@ -14,6 +14,8 @@ public class EntityMeta {
 
     private String label;
 
+    private boolean belongsToCrow;
+
     private Map<String, FieldStructure> fieldsMap;
 
     private Map<String, FieldStructure> voFieldsMap;

@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 import org.teamswift.crow.rest.annotation.I18N;
 import ${superEntityClass};
-import ${packageName}.${app}.vo.${module}Vo;
+import ${packageName}.${appLC}.vo.${module}Vo;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity

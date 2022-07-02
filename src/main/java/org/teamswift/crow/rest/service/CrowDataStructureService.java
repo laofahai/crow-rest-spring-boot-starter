@@ -1,5 +1,6 @@
 package org.teamswift.crow.rest.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
 import jdk.jfr.Label;
 import lombok.Getter;
@@ -123,6 +124,7 @@ public class CrowDataStructureService {
             entityMeta.setFieldsMap(fieldStructureMap);
             entityMeta.setLabel(entityLabel);
             entityMeta.setName(entityName);
+            entityMeta.setBelongsToCrow(entityCls.getName().startsWith("org.teamswift.crow"));
             entityMeta.setVoFieldsMap(voStructureMap);
             this.entitiesDataStructureMap.put(apiPath, entityMeta);
         }
@@ -172,6 +174,10 @@ public class CrowDataStructureService {
         // if this entity can pre-load in front-end widgets like select, combo, etc.
         if(field.isAnnotationPresent(ForeignPreLoad.class) || field.getType().isAnnotationPresent(ForeignPreLoad.class)) {
             fs.setPreload(true);
+        }
+
+        if(field.isAnnotationPresent(JsonIgnore.class)) {
+            fs.setJsonIgnore(true);
         }
 
         // column
