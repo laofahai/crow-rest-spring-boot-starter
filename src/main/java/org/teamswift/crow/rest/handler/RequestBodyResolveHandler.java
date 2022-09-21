@@ -10,6 +10,7 @@ import org.teamswift.crow.rest.exception.impl.ParameterInvalidException;
 import org.teamswift.crow.rest.handler.requestParams.FilterItem;
 import org.teamswift.crow.rest.handler.requestParams.QueryOperator;
 import org.teamswift.crow.rest.handler.requestParams.RequestBodyResolved;
+import org.teamswift.crow.rest.service.CrowDataStructureService;
 import org.teamswift.crow.rest.utils.CrowBeanUtils;
 import org.teamswift.crow.rest.utils.CrowMessageUtil;
 import org.teamswift.crow.rest.utils.NamingUtils;
@@ -26,7 +27,7 @@ public class RequestBodyResolveHandler {
     private static final ObjectMapper objectMapper = CrowBeanUtils.getBean(ObjectMapper.class);
 
     /**
-     * To support the filter style like: foo=@a,b means foo in (a, b)
+     * To support the filter style like foo=@a,b means foo in (a, b)
      */
     private static final List<String> simpleOperators = new ArrayList<>(){{
         add("!"); // !=
@@ -53,6 +54,8 @@ public class RequestBodyResolveHandler {
 
         Map<String, Field> fields = Scaffolds.getAllDeclareFieldsMap(entityCls);
         List<String> existsFields = new ArrayList<>(fields.keySet());
+
+        CrowDataStructureService crowDataStructureService = CrowBeanUtils.getBean(CrowDataStructureService.class);
 
         // 解析所有 get 请求参数
         while (params.hasMoreElements()) {
@@ -101,12 +104,18 @@ public class RequestBodyResolveHandler {
                     if(name.length() > 4) {
                         endName = NamingUtils.underlineToCamel(name.substring(0, name.length() - 4));
                     }
+
                     if(name.endsWith("_begin")) {
                         filtersRaw.add(new FilterItem(beginName, QueryOperator.EGT, value));
                     } else if(name.endsWith("_end")) {
                         filtersRaw.add(new FilterItem(endName, QueryOperator.ELT, value));
                     } else if (existsFields.contains(name) || name.contains(".") || name.contains("|")) {
-                        filtersRaw.add(new FilterItem(name, value));
+                        Object obj = crowDataStructureService.tryTransValue(fields.get(name), QueryOperator.EQ, value);
+                        QueryOperator operator = QueryOperator.EQ;
+                        if(value.startsWith("%")) {
+                            operator = QueryOperator.LIKE;
+                        }
+                        filtersRaw.add(new FilterItem(name, operator, obj));
                     }
             }
         }
@@ -146,7 +155,8 @@ public class RequestBodyResolveHandler {
                         break;
                 }
 
-                filtersRaw.add(new FilterItem(String.valueOf(item.get("property")), operator, item.get("value")));
+                Object value = crowDataStructureService.tryTransValue(fields.get(item.get("property")), operator, item.get("value"));
+                filtersRaw.add(new FilterItem(String.valueOf(item.get("property")), operator, value));
             });
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -247,7 +257,7 @@ public class RequestBodyResolveHandler {
                 String property = (String) sorter.get("property");
                 String direction = (String) sorter.get("direction");
                 Sort.Order order = new Sort.Order(
-                        direction.equals("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                        "ASC".equals(direction) ? Sort.Direction.ASC : Sort.Direction.DESC,
                         property
                 );
                 orders.add(order);
@@ -260,7 +270,7 @@ public class RequestBodyResolveHandler {
             String property = sortStr.substring(1);
 
             Sort.Order order = new Sort.Order(
-                    direction.equals("+") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                    "+".equals(direction) ? Sort.Direction.ASC : Sort.Direction.DESC,
                     property
             );
             orders.add(order);

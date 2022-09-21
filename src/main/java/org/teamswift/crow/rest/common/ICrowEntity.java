@@ -10,6 +10,8 @@ public interface ICrowEntity<ID, V extends ICrowIO> extends ICrowIO {
 
     ID gtId();
 
+    void setId(ID id);
+
     boolean isDeleted();
 
     void setDeleted(boolean deleted);

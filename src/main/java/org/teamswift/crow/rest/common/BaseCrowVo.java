@@ -11,7 +11,9 @@ import javax.persistence.Transient;
 import java.util.Date;
 
 @Data
-abstract public class BaseCrowVo implements ICrowVo {
+abstract public class BaseCrowVo<ID> implements ICrowVo {
+
+    private ID id;
 
     private Date deletedDate;
 

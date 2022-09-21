@@ -17,9 +17,11 @@ import org.teamswift.crow.rest.annotation.*;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.common.ICrowIO;
 import org.teamswift.crow.rest.common.ICrowVo;
+import org.teamswift.crow.rest.exception.BusinessException;
 import org.teamswift.crow.rest.handler.dataStructure.DataType;
 import org.teamswift.crow.rest.handler.dataStructure.EntityMeta;
 import org.teamswift.crow.rest.handler.dataStructure.FieldStructure;
+import org.teamswift.crow.rest.handler.requestParams.QueryOperator;
 import org.teamswift.crow.rest.utils.EnumUtils;
 import org.teamswift.crow.rest.utils.GenericUtils;
 import org.teamswift.crow.rest.utils.Scaffolds;
@@ -28,6 +30,8 @@ import javax.persistence.*;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 @Service
@@ -40,9 +44,15 @@ public class CrowDataStructureService {
 
     private final Map<String, EntityMeta> voDataStructureMap = new HashMap<>();
 
+    private final Map<Field, FieldStructure> allFieldsMap = new HashMap<>();
+
     private final Map<Class<? extends ICrowIO>, Class<? extends ICrowIO>> entityVoMap = new HashMap<>();
 
     private final Logger logger = LoggerFactory.getLogger(CrowDataStructureService.class);
+
+    private final List<QueryOperator> needSplitFormatOperator = Arrays.asList(
+            QueryOperator.IN, QueryOperator.NIN, QueryOperator.BTW
+    );
 
     private final List<String> defaultFields = Arrays.asList(
             "id", "createdBy", "modifiedBy", "createdAt", "modifiedAt", "deleted", "deletedDate",
@@ -117,6 +127,8 @@ public class CrowDataStructureService {
                     }
                     voStructureMap.put(field.getName(), voFs);
                 }
+
+                allFieldsMap.put(field, fs);
             }
 
             EntityMeta entityMeta = new EntityMeta();
@@ -219,7 +231,7 @@ public class CrowDataStructureService {
         if(type.isEnum()) {
             fs.setType(DataType.ENUM);
             fs.setChoices(EnumUtils.enumToListMap(type));
-        } else if(ICrowEntity.class.isAssignableFrom(type)) {
+        } else if(ICrowIO.class.isAssignableFrom(type)) {
             if(t == null) {
                 // foreign
                 if(type.isAnnotationPresent(ForeignDisplayField.class)) {
@@ -239,6 +251,8 @@ public class CrowDataStructureService {
                     break;
                 case "INTEGER":
                 case "INT":
+                case "LONG":
+                case "SHORT":
                     fs.setType(DataType.NUMBER);
                     break;
                 case "CHAR":
@@ -271,6 +285,102 @@ public class CrowDataStructureService {
             apiPath = String.format("%s.%s", raw[0], Scaffolds.lcfirst(raw[2]));
         }
         return apiPath;
+    }
+
+    public Object tryTransValue(Field field, QueryOperator queryOperator, Object value) {
+
+        if(value instanceof List) {
+            List<Object> result = new ArrayList<>();
+            for(Object valueItem: (List<?>) value) {
+                result.add(tryTransValue(field, queryOperator, valueItem));
+            }
+            return result;
+        }
+
+        FieldStructure fieldConfig = allFieldsMap.get(field);
+        if(fieldConfig == null) {
+            return value;
+        }
+
+        // 需要变成 list
+        DataType dataType = fieldConfig.getType();
+
+        if(needSplitFormatOperator.contains(queryOperator)) {
+            String[] tmp = String.valueOf(value).replaceAll(",", "\\|").split("\\|");
+            List<Object> result = new ArrayList<>();
+            for(String str: tmp) {
+                result.add(getResultValue(dataType.name().toLowerCase(), field, value));
+            }
+            return result;
+        } else {
+            return getResultValue(dataType.name().toLowerCase(), field, value);
+        }
+    }
+
+    private <T extends ICrowEntity<Integer, ?>> Object getResultValue(String dataType, Field field, Object value) {
+        Object resultValue;
+        switch(dataType) {
+            case "date":
+                resultValue = Scaffolds.tryTransDateString(value);
+                break;
+            case "number":
+            case "integer":
+                resultValue = Scaffolds.inputValueToInteger(value);
+                break;
+            case "bigdecimal":
+                resultValue = Scaffolds.inputValueToDecimal(value);
+                break;
+            case "boolean":
+                resultValue = Scaffolds.inputValueToBoolean(value);
+                break;
+            case "enum":
+                String fullName = field.getType().getName();
+                Method method;
+                try {
+                    Class<?> cls = Class.forName(fullName);
+                    method = cls.getDeclaredMethod("valueOf", String.class);
+                    if(value instanceof Collection) {
+                        List<Object> result = new ArrayList<>();
+                        for(Object vItem: (Collection<?>) value) {
+                            result.add(method.invoke(null, vItem));
+                        }
+                        resultValue = result;
+                    } else {
+                        resultValue = method.invoke(null, value);
+                    }
+                } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                    throw new BusinessException("枚举类型转换错误：" + value + "; " + e.getMessage());
+                }
+                break;
+            case "foreign":
+                T entity;
+                try {
+                    if(value instanceof Collection) {
+                        List<Object> result = new ArrayList<>();
+                        for(Object vItem: (Collection<?>) value) {
+                            T ne = (T) field.getType().getDeclaredConstructor().newInstance();
+                            ne.setId(Scaffolds.inputValueToInteger(vItem));
+                            result.add(ne);
+                        }
+                        resultValue = result;
+                    } else if(value instanceof ICrowEntity) {
+                        resultValue = value;
+                    } else {
+                        entity = (T) field.getType().getDeclaredConstructor().newInstance();
+                        entity.setId(Scaffolds.inputValueToInteger(value));
+                        resultValue = entity;
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+                    e.printStackTrace();
+                    throw new BusinessException("外键数据转换实例化错误：" + field.getType().getName() + "#" + value);
+                }
+                break;
+            default:
+                resultValue = value;
+        }
+
+        return resultValue;
     }
 
 }

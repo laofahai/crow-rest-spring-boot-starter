@@ -27,6 +27,11 @@ public class ${module} extends ${superEntity}<
         return id;
     }
 
+    @Override
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     // generator placeholder, don't remove this line.
 
 }
