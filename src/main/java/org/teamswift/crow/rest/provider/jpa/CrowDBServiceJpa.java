@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamswift.crow.rest.common.ICrowDBService;
+import org.teamswift.crow.rest.common.ICrowDto;
 import org.teamswift.crow.rest.common.ICrowEntity;
+import org.teamswift.crow.rest.common.ICrowIO;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
 import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.DataNotFoundException;
@@ -30,6 +32,7 @@ import javax.persistence.Query;
 import javax.persistence.criteria.*;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -40,10 +43,12 @@ import java.util.*;
  * @param <T>
  */
 public class CrowDBServiceJpa<
-            ID, T extends ICrowEntity<ID, ?>
+            ID extends Serializable,
+            D extends ICrowIO,
+            T extends ICrowEntity<ID, ?>
         >
         extends SimpleJpaRepository<T, ID>
-        implements ICrowDBService<ID, T> {
+        implements ICrowDBService<ID, D, T> {
 
     private final EntityManager entityManager;
 
@@ -114,7 +119,7 @@ public class CrowDBServiceJpa<
                             paths.add(Scaffolds.getExpressionPath(orField, root));
                         }
 
-                        Method method = CrowQueryBuilder.class.getDeclaredMethod(
+                        Method method = CrowQueryBuilderJpa.class.getDeclaredMethod(
                                 filterItem.getOperator().getOperatorName(),
                                 List.class, Object.class, Object.class, Predicate.class, CriteriaBuilder.class
                         );
@@ -127,7 +132,7 @@ public class CrowDBServiceJpa<
                                 condition, criteriaBuilder);
                     // normal style
                     } else {
-                        Method method = CrowQueryBuilder.class.getDeclaredMethod(
+                        Method method = CrowQueryBuilderJpa.class.getDeclaredMethod(
                                 filterItem.getOperator().getOperatorName(),
                                 Expression.class, Object.class, Object.class, Predicate.class, CriteriaBuilder.class
                         );
@@ -172,27 +177,7 @@ public class CrowDBServiceJpa<
 
     @Override
     public Optional<T> findOneById(ID id) {
-        return findOneBy("id", id);
-    }
-
-    @Override
-    public Optional<T> findOneBy(String field, Object value) {
-        Specification<T> spec = (root, query, criteriaBuilder) -> {
-            Path<Object> path = null;
-            if(field.contains(".")) {
-                String[] pathArray = field.split("\\.");
-                for(String p: pathArray) {
-                    path = Objects.requireNonNullElse(path, root).get(p);
-                }
-            } else {
-                path = root.get(field);
-            }
-
-            return criteriaBuilder.equal(
-                    path, value
-            );
-        };
-        return findOne(spec);
+        return findById(id);
     }
 
     @Override
@@ -201,7 +186,7 @@ public class CrowDBServiceJpa<
     }
 
     @Override
-    public T update(ID id, T dto) {
+    public T update(ID id, D dto) {
 
         Class<T> domainCls = getEntityCls();
 
@@ -278,8 +263,9 @@ public class CrowDBServiceJpa<
     }
 
     @Override
-    public void destroy(T entity) {
+    public int destroy(T entity) {
         delete(entity);
+        return 1;
     }
 
     @Override

@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class CrowQueryBuilder {
+public class CrowQueryBuilderJpa {
 
     static public Predicate equals(Expression path, Object value, Object raw, Predicate result, CriteriaBuilder cb) {
         if(value == null || value == "" || value == "null") {

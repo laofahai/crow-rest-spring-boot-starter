@@ -8,10 +8,11 @@ import org.teamswift.crow.rest.annotation.SystemGeneratedValue;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
-abstract public class BaseCrowVo<ID> implements ICrowVo {
+abstract public class BaseCrowVo<ID extends Serializable> implements ICrowVo {
 
     private ID id;
 

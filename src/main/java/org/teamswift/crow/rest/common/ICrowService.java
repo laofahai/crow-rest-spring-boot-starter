@@ -3,7 +3,9 @@ package org.teamswift.crow.rest.common;
 import org.teamswift.crow.rest.exception.impl.DataNotFoundException;
 import org.teamswift.crow.rest.provider.jpa.ICrowRepositoryJpa;
 
-public interface ICrowService<ID, E extends ICrowEntity<ID, ?>, R extends ICrowRepositoryJpa<ID, E>> {
+import java.io.Serializable;
+
+public interface ICrowService<ID extends Serializable, E extends ICrowEntity<ID, ?>, R extends ICrowRepositoryJpa<ID, E>> {
 
     R getRepository();
 

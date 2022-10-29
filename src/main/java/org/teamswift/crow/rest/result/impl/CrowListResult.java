@@ -41,6 +41,10 @@ public class CrowListResult<T> implements ICrowListResult<T> {
         this.pageSize = pageSize;
     }
 
+    public CrowListResult(Collection<T> data) {
+        this.data = data;
+    }
+
     public int getStatus() {
         return getResultCode() == null ? 200 : getResultCode().getCode();
     }

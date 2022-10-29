@@ -8,11 +8,12 @@ import org.teamswift.crow.rest.annotation.SystemGeneratedValue;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @MappedSuperclass
-abstract public class BaseCrowEntity<ID, V extends ICrowIO> implements ICrowEntity<ID, V> {
+abstract public class BaseCrowEntity<ID extends Serializable, V extends ICrowIO> implements ICrowEntity<ID, V> {
 
     @I18N("DeletedAt")
     @SystemGeneratedValue
