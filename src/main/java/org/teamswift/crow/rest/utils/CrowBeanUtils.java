@@ -17,6 +17,9 @@ public class CrowBeanUtils {
     }
 
     public static <T> T getBean(Class<T> c){
+        if(applicationContext == null) {
+            return null;
+        }
         return applicationContext.getBean(c);
     }
 

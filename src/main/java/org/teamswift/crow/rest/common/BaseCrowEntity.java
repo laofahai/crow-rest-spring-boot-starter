@@ -1,5 +1,6 @@
 package org.teamswift.crow.rest.common;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -20,6 +21,7 @@ abstract public class BaseCrowEntity<ID extends Serializable, V extends ICrowIO>
     private Date deletedDate;
 
     @Transient
+    @TableField(exist = false)
     @I18N("IsDeleted")
     @SystemGeneratedValue
     private boolean deleted;

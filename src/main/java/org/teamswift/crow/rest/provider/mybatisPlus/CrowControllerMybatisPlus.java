@@ -20,7 +20,7 @@ public class CrowControllerMybatisPlus <
         implements CrowController<ID, T, V, D> {
 
     protected M getMapper(){
-        Class<M> mapperClass = (Class<M>) GenericUtils.get(this.getClass(), 3);
+        Class<M> mapperClass = (Class<M>) GenericUtils.get(this.getClass(), 4);
         return CrowBeanUtils.getBean(mapperClass);
     }
 

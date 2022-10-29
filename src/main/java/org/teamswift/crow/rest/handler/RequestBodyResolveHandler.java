@@ -24,8 +24,6 @@ import java.util.*;
 
 public class RequestBodyResolveHandler {
 
-    private static final ObjectMapper objectMapper = CrowBeanUtils.getBean(ObjectMapper.class);
-
     /**
      * To support the filter style like foo=@a,b means foo in (a, b)
      */
@@ -123,6 +121,7 @@ public class RequestBodyResolveHandler {
         // handle filter string
         // the filter string is a JSON string seems like: [{property: xx, operation: =, value: bar}, {}]
         try {
+            ObjectMapper objectMapper = CrowBeanUtils.getBean(ObjectMapper.class);
             List<Map<String, Object>> ofFilterStrings = objectMapper.readValue(filtersStr, List.class);
             ofFilterStrings.forEach(item -> {
                 if(!item.containsKey("property") || !item.containsKey("value")) {
@@ -248,6 +247,7 @@ public class RequestBodyResolveHandler {
         if(sortStr.startsWith("[")) {
             List<Map<String, ?>> sorters;
             try {
+                ObjectMapper objectMapper = CrowBeanUtils.getBean(ObjectMapper.class);
                 sorters = objectMapper.readValue(sortStr, List.class);
             } catch (IOException e) {
                 sorters = new ArrayList<>();

@@ -47,15 +47,16 @@ public class CrowExceptionHandler extends ResponseEntityExceptionHandler {
                 if(Strings.isNullOrEmpty(e.getDefaultMessage())) {
                     return;
                 }
-                errorsMsg.add(
-                        CrowMessageUtil.get(
-                                "error." +
-                                e.getDefaultMessage().replaceAll(" ", "-")
-                                        .replaceAll("\\.", "-")
-                                        .replaceAll("=", "-")
-                                        .toLowerCase(Locale.ROOT)
-                        )
-                );
+                String fullKey = "error." + e.getDefaultMessage().replaceAll(" ", "-")
+                        .replaceAll("\\.", "-")
+                        .replaceAll("=", "-")
+                        .toLowerCase(Locale.ROOT);
+                String message = CrowMessageUtil.get(fullKey);
+                if(message.equals(fullKey)) {
+                    message = e.getDefaultMessage();
+                }
+
+                errorsMsg.add(message);
             });
             result.setData(String.join(", ", errorsMsg));
             result.setResultCode(CrowResultCode.PARAM_IS_INVALID);
@@ -63,7 +64,7 @@ public class CrowExceptionHandler extends ResponseEntityExceptionHandler {
             result = CrowResult.ofError(ex);
         }
 
-        return new ResponseEntity(result, headers, status);
+        return new ResponseEntity<>(result, headers, status);
     }
 
 }

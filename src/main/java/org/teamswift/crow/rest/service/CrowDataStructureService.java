@@ -52,6 +52,8 @@ public class CrowDataStructureService {
 
     private final Logger logger = LoggerFactory.getLogger(CrowDataStructureService.class);
 
+    public static Set<Class<?>> entityClasses = new HashSet<>();
+
     private final List<QueryOperator> needSplitFormatOperator = Arrays.asList(
             QueryOperator.IN, QueryOperator.NIN, QueryOperator.BTW
     );
@@ -63,32 +65,30 @@ public class CrowDataStructureService {
 
     public CrowDataStructureService(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.register();
+        this.register(CrowDataStructureService.entityClasses);
     }
 
-    private void register() {
+    public void register() {
         MetamodelImpl model = (MetamodelImpl) entityManager.getEntityManagerFactory().getMetamodel();
         Map<String, EntityPersister> entityPersisters = model.entityPersisters();
 
+        Set<Class<?>> classes = new HashSet<>();
         for(Map.Entry<String, EntityPersister> entry: entityPersisters.entrySet()) {
             EntityPersister persist = entry.getValue();
             Class<?> entityClsRaw = persist.getMappedClass();
+            classes.add(entityClsRaw);
+        }
 
-            // only handle the entities belongs to ICrowEntity
-//            if(!ICrowEntity.class.isAssignableFrom(entityClsRaw)) {
-//                logger.warn(
-//                        "The entity {} is not managed by crow", entityClsRaw.getName()
-//                );
-//                continue;
-//            }
+        register(classes);
+    }
+
+    public void register(Set<Class<?>> classes) {
+
+        for(Class<?> entityClsRaw: classes) {
 
             Class<? extends ICrowIO> entityCls = (Class<? extends ICrowIO>) entityClsRaw;
 
             Class<? extends ICrowVo> voCls = (Class<? extends ICrowVo>) GenericUtils.get(entityCls, 1);
-
-//            if(voCls == null) {
-//                continue;
-//            }
 
             // api path
             String apiPath = getApiPath(entityCls);
@@ -150,16 +150,18 @@ public class CrowDataStructureService {
         FieldStructure fs = new FieldStructure();
 
         PropertyDescriptor pd;
+        Class<?> type;
         try {
             pd = new PropertyDescriptor(field.getName(), cls);
+            type = pd.getPropertyType();
         } catch (IntrospectionException e) {
             logger.warn(
                     "Error while instance a new PropertyDescriptor for the field {} in {} ", field.getName(), cls.getName()
             );
-            return fs;
+            type = field.getType();
         }
         // Field Type
-        Class<?> type = pd.getPropertyType();
+//        Class<?> type = pd.getPropertyType();
 
         fs.setKey(field.getName());
 

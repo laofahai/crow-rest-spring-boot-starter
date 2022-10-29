@@ -19,8 +19,6 @@ import java.util.List;
 
 public class CrowResult {
 
-    static private final CrowServiceProperties properties = CrowBeanUtils.getBean(CrowServiceProperties.class);
-
     static public CrowErrorResult ofError(BusinessException e) {
         return new CrowErrorResult(e);
     }
@@ -39,6 +37,7 @@ public class CrowResult {
     }
 
     static public <E> ICrowResult<E> ofSuccess(E data) {
+        CrowServiceProperties properties = CrowBeanUtils.getBean(CrowServiceProperties.class);
         return ofSuccess(data, properties.getDefaultResultClass());
     }
 
@@ -55,6 +54,7 @@ public class CrowResult {
     }
 
     static public <E, L extends Collection<E>> ICrowListResult<E> ofList(L list, int totalItems, int page, int pageSize) {
+        CrowServiceProperties properties = CrowBeanUtils.getBean(CrowServiceProperties.class);
         return ofList(list, totalItems, page, pageSize, properties.getDefaultListResultClass());
     }
 
