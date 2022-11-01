@@ -1,10 +1,12 @@
 package org.teamswift.crow.rest.result;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 import java.util.Collection;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public interface ICrowListResult<T> extends Serializable {
 
     ICrowResultCode getResultCode();

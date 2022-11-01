@@ -69,20 +69,22 @@ public class CrowDBServiceMybatisPlus<
     @Override
     public ICrowListResult<T> findAll(RequestBodyResolved body) {
 
-        CrowQueryBuilderMybatisPlus<ID, V, T> queryWrapper = new CrowQueryBuilderMybatisPlus<>();
-
-        if(body.isOnlyDeleted()) {
-            queryWrapper.isNotNull(PresetTableFields.DeletedTime.getName());
-        } else {
-            queryWrapper.isNull(PresetTableFields.DeletedTime.getName());
-        }
-
         EntityMeta entityMeta = dataStructureService.getEntitiesDataStructureMap().get(
                 dataStructureService.getApiPath(entityCls)
         );
 
+        CrowQueryBuilderMybatisPlus<ID, V, T> queryWrapper = new CrowQueryBuilderMybatisPlus<>();
+
         if(entityMeta == null) {
             return null;
+        }
+
+        if(entityMeta.isSoftDelete()) {
+            if(body.isOnlyDeleted()) {
+                queryWrapper.isNotNull(PresetTableFields.DeletedTime.getName());
+            } else {
+                queryWrapper.isNull(PresetTableFields.DeletedTime.getName());
+            }
         }
 
         for(FilterItem filterItem: body.getFilterItems()) {

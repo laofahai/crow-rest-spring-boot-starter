@@ -65,6 +65,7 @@ public class RequestBodyResolveHandler {
             }
 
             switch (name) {
+                case "page":
                 case "_page":
                 case "_pageNo":
                 case "_pn":
@@ -72,6 +73,8 @@ public class RequestBodyResolveHandler {
                     pageNumber = Integer.parseInt(value);
                     break;
                 case "_limit":
+                case "limit":
+                case "pageSize":
                 case "_pageSize":
                 case "_ps":
                     pageSize = Integer.parseInt(value);

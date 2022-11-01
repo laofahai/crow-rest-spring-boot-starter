@@ -1,6 +1,7 @@
 package org.teamswift.crow.rest.common;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,7 +79,7 @@ public interface CrowController<
 
     @RequestMapping(method = RequestMethod.POST)
     @Transactional
-    default ICrowResult<V> store(@RequestBody D dto) {
+    default ICrowResult<V> store(@RequestBody @Validated D dto) {
         T entity = DozerUtils.map(dto, getEntityCls());
         entity = getCrowProvider().store(entity);
 
@@ -87,7 +88,7 @@ public interface CrowController<
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
     @Transactional
-    default ICrowResult<V> update(@PathVariable ID id, @RequestBody D dto) {
+    default ICrowResult<V> update(@PathVariable ID id, @RequestBody @Validated D dto) {
         T entity = getCrowProvider().update(id, dto);
         return CrowResult.ofSuccess(DozerUtils.map(entity, getVoCls()));
     }

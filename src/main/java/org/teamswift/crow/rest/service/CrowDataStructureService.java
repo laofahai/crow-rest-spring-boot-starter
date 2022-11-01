@@ -138,6 +138,7 @@ public class CrowDataStructureService {
             entityMeta.setFieldsMap(fieldStructureMap);
             entityMeta.setLabel(entityLabel);
             entityMeta.setName(entityName);
+            entityMeta.setSoftDelete(entityCls.isAnnotationPresent(SoftDelete.class));
             entityMeta.setBelongsToCrow(entityCls.getName().startsWith("org.teamswift.crow"));
             entityMeta.setVoFieldsMap(voStructureMap);
             this.entitiesDataStructureMap.put(apiPath, entityMeta);

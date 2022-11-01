@@ -19,6 +19,8 @@ public class CrowListResult<T> implements ICrowListResult<T> {
 
     private int status;
 
+    private int code;
+
     @JsonIgnore
     private HttpStatus httpStatus = HttpStatus.OK;
 
@@ -47,6 +49,10 @@ public class CrowListResult<T> implements ICrowListResult<T> {
 
     public int getStatus() {
         return getResultCode() == null ? 200 : getResultCode().getCode();
+    }
+
+    public int getCode() {
+        return getStatus();
     }
 
 }

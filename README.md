@@ -44,7 +44,8 @@ public class CrowRestDemoApplication {
 ```
 
 ### handler for database
-crow-rest is now only provide a JPA handler for database things. so please just configure JPA as usually in your `application.yml`
+crow-rest is now provides a JPA handler and a Mybatis-Plus handler for database things. 
+so please just configure that as usually as you did before.
 
 ### security framework
 crow-rest wasn't provide a security framework in it by now, so just deal with it as you want.

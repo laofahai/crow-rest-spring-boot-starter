@@ -20,6 +20,8 @@ public class CrowErrorResult implements ICrowResult<String> {
 
     private int status;
 
+    private int code;
+
     private ICrowResultCode resultCode;
 
     @JsonIgnore
@@ -38,5 +40,9 @@ public class CrowErrorResult implements ICrowResult<String> {
     @Override
     public int getStatus() {
         return getResultCode() == null ? 500 : getResultCode().getCode();
+    }
+
+    public int getCode() {
+        return getStatus();
     }
 }

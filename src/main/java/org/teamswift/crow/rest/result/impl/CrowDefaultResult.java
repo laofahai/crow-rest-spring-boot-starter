@@ -18,6 +18,8 @@ public class CrowDefaultResult<T> implements ICrowResult<T> {
 
     private int status;
 
+    private int code;
+
     private ICrowResultCode resultCode = CrowResultCode.SUCCESS;
 
     @JsonIgnore
@@ -37,4 +39,7 @@ public class CrowDefaultResult<T> implements ICrowResult<T> {
         return getResultCode() == null ? 200 : getResultCode().getCode();
     }
 
+    public int getCode() {
+        return getStatus();
+    }
 }

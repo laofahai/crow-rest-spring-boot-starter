@@ -16,6 +16,8 @@ public class EntityMeta {
 
     private boolean belongsToCrow;
 
+    private boolean softDelete;
+
     private Map<String, FieldStructure> fieldsMap;
 
     private Map<String, FieldStructure> voFieldsMap;
