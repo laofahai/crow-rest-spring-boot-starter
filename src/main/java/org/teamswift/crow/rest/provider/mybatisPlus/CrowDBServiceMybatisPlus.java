@@ -1,12 +1,12 @@
 package org.teamswift.crow.rest.provider.mybatisPlus;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.teamswift.crow.rest.common.ICrowDBService;
 import org.teamswift.crow.rest.common.ICrowEntity;
 import org.teamswift.crow.rest.common.ICrowIO;
@@ -133,8 +133,24 @@ public class CrowDBServiceMybatisPlus<
             }
         }
 
-        // @todo order by
+        Sort sortOrder = body.getSortOrders();
+        Map<String, FieldStructure> fieldsMap = entityMeta.getFieldsMap();
+        for(Sort.Order sort: sortOrder) {
+            if(!fieldsMap.containsKey(sort.getProperty())) {
+                continue;
+            }
+            if(sort.isDescending()) {
+                queryWrapper.orderByDesc(
+                        fieldsMap.get(sort.getProperty()).getPhysicalFieldName()
+                );
+            } else {
+                queryWrapper.orderByAsc(
+                        fieldsMap.get(sort.getProperty()).getPhysicalFieldName()
+                );
+            }
+        }
 
+        assert properties != null;
         ICrowListResult<T> result = properties.getListResultInstance();
 
         int pageNumber = body.getPage();
@@ -185,7 +201,7 @@ public class CrowDBServiceMybatisPlus<
     @Override
     public Optional<T> findOneById(ID id) {
         T result = mapper.selectById(id);
-        return Optional.of(result);
+        return Optional.ofNullable(result);
     }
 
     @Override

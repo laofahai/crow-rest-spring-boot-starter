@@ -29,7 +29,7 @@ public class CrowAutoConfigure implements WebMvcConfigurer {
         //添加映射路径
         registry.addMapping("/**")
                 .allowCredentials(false)
-                .allowedOriginPatterns("*")
+//                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("*");

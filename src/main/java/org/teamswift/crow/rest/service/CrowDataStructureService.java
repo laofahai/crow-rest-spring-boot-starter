@@ -114,9 +114,9 @@ public class CrowDataStructureService {
 
             for(Field field: fields) {
 
-                if(defaultFields.contains(field.getName())) {
-                    continue;
-                }
+//                if(defaultFields.contains(field.getName())) {
+//                    continue;
+//                }
 
                 FieldStructure fs = parseFieldStructure(field, entityCls, apiPath);
                 fieldStructureMap.put(field.getName(), fs);
@@ -278,9 +278,11 @@ public class CrowDataStructureService {
                     break;
                 default:
                     if(t == null) {
-                        fs.setType(DataType.valueOf(
-                                simpleName
-                        ));
+                        try {
+                            fs.setType(DataType.valueOf(
+                                    simpleName
+                            ));
+                        } catch (Exception ignore) {}
                     }
                     break;
             }

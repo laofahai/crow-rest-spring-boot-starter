@@ -1,7 +1,7 @@
 package org.teamswift.crow.rest.result;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.teamswift.crow.rest.common.ICrowIO;
 import org.teamswift.crow.rest.configure.CrowServiceProperties;
@@ -64,6 +64,15 @@ public class CrowResult {
                 pageResult.getRecords(),
                 pageResult.getTotal(),
                 Math.toIntExact(pageResult.getCurrent()),
+                Math.toIntExact(pageResult.getSize())
+        );
+    }
+
+    static public <O> ICrowListResult<O> ofList(Page<O> pageResult) {
+        return new CrowListResult<>(
+                pageResult.getContent(),
+                pageResult.getTotalElements(),
+                Math.toIntExact(pageResult.getNumber()),
                 Math.toIntExact(pageResult.getSize())
         );
     }

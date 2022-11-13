@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.teamswift.crow.rest.annotation.SoftDelete;
 import org.teamswift.crow.rest.exception.BusinessException;
 import org.teamswift.crow.rest.exception.CrowErrorMessage;
 import org.teamswift.crow.rest.exception.impl.DataNotFoundException;
@@ -81,8 +82,8 @@ public interface CrowController<
     @Transactional
     default ICrowResult<V> store(@RequestBody @Validated D dto) {
         T entity = DozerUtils.map(dto, getEntityCls());
+        entity.setId(null);
         entity = getCrowProvider().store(entity);
-
         return CrowResult.ofSuccess(DozerUtils.map(entity, getVoCls()));
     }
 
@@ -100,9 +101,13 @@ public interface CrowController<
         T entity = provider.findOneById(id).orElseThrow(() -> {
             throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
         });
-        T deleted = provider.softDelete(entity);
 
-        return CrowResult.ofSuccess(deleted);
+        if(entity.getClass().isAnnotationPresent(SoftDelete.class)) {
+            T deleted = provider.softDelete(entity);
+            return CrowResult.ofSuccess(deleted);
+        } else {
+            return destroy(id);
+        }
     }
 
     /**
@@ -116,9 +121,13 @@ public interface CrowController<
 
         ICrowDBService<ID, D, T> provider = getCrowProvider();
         ICrowListResult<T> list = provider.findAllByIdsIn(idList);
-        int num = provider.softDeleteBatch(list.getData());
 
-        return CrowResult.ofSuccess(num);
+        if(getEntityCls().isAnnotationPresent(SoftDelete.class)) {
+            int num = provider.softDeleteBatch(list.getData());
+            return CrowResult.ofSuccess(num);
+        } else {
+            return destroyBatch(ids);
+        }
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/destroy/{id}")
@@ -129,7 +138,7 @@ public interface CrowController<
             throw new DataNotFoundException(CrowMessageUtil.error(CrowErrorMessage.NotFoundByID));
         });
 
-        if(!entity.isDeleted()) {
+        if(entity.getClass().isAnnotationPresent(SoftDelete.class) && !entity.isDeleted()) {
             throw new BusinessException(CrowMessageUtil.error(CrowErrorMessage.EntityNotBeenSoftDeleted));
         }
 
